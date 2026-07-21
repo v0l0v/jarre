@@ -483,9 +483,14 @@
         });
 
         let keyBuffer = '';
+        let terminalState = 'normal';
+        let pendingPlanetData = null;
+
         function openTerminal() {
             document.getElementById('game-terminal').style.display = 'flex';
             document.getElementById('terminal-input').focus();
+            terminalState = 'normal';
+            document.getElementById('terminal-input').type = 'text';
             const out = document.getElementById('terminal-output');
             out.innerHTML = `<div>SISTEMA DE NAVEGACIÓN ESTELAR (BASH)</div><div>========================================</div>`;
             out.innerHTML += `<div>(Escribe 'help' o 'ayuda' para ver los comandos)</div><br/>`;
@@ -501,9 +506,56 @@
                 const rawVal = e.target.value.trim();
                 const val = rawVal.toLowerCase();
                 e.target.value = '';
-                if (!val) return;
+                if (val === '') {
+                    if (terminalState === 'normal') return;
+                    // if empty while awaiting password, do nothing and return
+                }
                 
                 const out = document.getElementById('terminal-output');
+                
+                if (terminalState === 'awaiting_password') {
+                    out.innerHTML += `<div>> ${'*'.repeat(rawVal.length)}</div>`;
+                    const password = rawVal;
+                    
+                    out.innerHTML += `<div>Autenticando y guardando en servidor...</div>`;
+                    out.scrollTop = out.scrollHeight;
+
+                    fetch('/api/mkplaneta', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            password: password,
+                            planet: pendingPlanetData
+                        })
+                    }).then(res => res.json()).then(data => {
+                        if (data.status === 'ok') {
+                            worldPalettes.push(pendingPlanetData);
+                            const totalWorlds = worldPalettes.length;
+                            for (let i = 0; i < totalWorlds; i++) {
+                                navMap[i] = {
+                                    right: (i + 1) % totalWorlds,
+                                    left: (i - 1 + totalWorlds) % totalWorlds,
+                                    up: (i + Math.floor(totalWorlds / 2)) % totalWorlds,
+                                    down: (i - Math.floor(totalWorlds / 2) + totalWorlds) % totalWorlds,
+                                    center: (i + 2) % totalWorlds,
+                                    edges: (i - 2 + totalWorlds) % totalWorlds
+                                };
+                            }
+                            out.innerHTML += `<div>¡Planeta [${worldPalettes.length-1}] ${pendingPlanetData.name} guardado PERMANENTEMENTE!</div>`;
+                        } else {
+                            out.innerHTML += `<div>Acceso denegado o error: ${data.error}</div>`;
+                        }
+                        out.scrollTop = out.scrollHeight;
+                    }).catch(err => {
+                        out.innerHTML += `<div>Error de conexión. ¿Está el servidor Python (server.py) activo?</div>`;
+                        out.scrollTop = out.scrollHeight;
+                    });
+
+                    terminalState = 'normal';
+                    document.getElementById('terminal-input').type = 'text';
+                    return;
+                }
+
                 out.innerHTML += `<div>> ${rawVal}</div>`;
                 
                 if (val === 'ls' || val === 'lista') {
@@ -534,7 +586,7 @@
                 } else if (val.startsWith('mkplaneta-')) {
                     const nombre = rawVal.substring(10).toUpperCase().trim();
                     if (nombre) {
-                        const newPlanet = {
+                        pendingPlanetData = {
                             name: nombre,
                             bg: Math.floor(Math.random()*0xffffff),
                             c1: Math.floor(Math.random()*0xffffff),
@@ -544,21 +596,10 @@
                             description: "Planeta generado por consola.",
                             hasTransmission: false
                         };
-                        worldPalettes.push(newPlanet);
-                        
-                        // Regenerar navMap para que sea visitable por atajos o flechas
-                        const totalWorlds = worldPalettes.length;
-                        for (let i = 0; i < totalWorlds; i++) {
-                            navMap[i] = {
-                                right: (i + 1) % totalWorlds,
-                                left: (i - 1 + totalWorlds) % totalWorlds,
-                                up: (i + Math.floor(totalWorlds / 2)) % totalWorlds,
-                                down: (i - Math.floor(totalWorlds / 2) + totalWorlds) % totalWorlds,
-                                center: (i + 2) % totalWorlds,
-                                edges: (i - 2 + totalWorlds) % totalWorlds
-                            };
-                        }
-                        out.innerHTML += `<div>¡Planeta [${worldPalettes.length-1}] ${nombre} creado! (Sesión actual).</div>`;
+                        out.innerHTML += `<div>Iniciando protocolo de creación para ${nombre}...</div>`;
+                        out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
+                        terminalState = 'awaiting_password';
+                        document.getElementById('terminal-input').type = 'password';
                     } else {
                         out.innerHTML += `<div>Error: Faltan argumentos. Usa mkplaneta-[nombre].</div>`;
                     }
