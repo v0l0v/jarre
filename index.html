@@ -587,8 +587,11 @@
                     out.innerHTML += `<div>  cat / view / ver   - Ver detalles de un planeta (ej: cat 0)</div>`;
                     out.innerHTML += `<div>  viajar / jump      - Iniciar viaje a un planeta (ej: viajar 1)</div>`;
                     out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio nuevo</div>`;
-                    out.innerHTML += `<div>  add-link [id] [url] [nombre_del_boton] - Añadir un botón multimedia</div>`;
-                    out.innerHTML += `<div>  rm-link [id] [indice_del_boton] - Eliminar un botón (índice 0, 1, 2...)</div>`;
+                    out.innerHTML += `<div>  add-link [id] [url] [nombre] - Añadir un botón multimedia</div>`;
+                    out.innerHTML += `<div>  rm-link [id] [indice]      - Eliminar un botón (índice 0, 1, 2...)</div>`;
+                    out.innerHTML += `<div>  exit / salir               - Cerrar la terminal</div>`;
+                } else if (val === 'exit' || val === 'salir') {
+                    document.getElementById('game-terminal').style.display = 'none';
                 } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
