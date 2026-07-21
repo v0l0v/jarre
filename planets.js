@@ -50,7 +50,7 @@ const worldPalettes = [
         "type": "toxic",
         "description": "Atmósfera corrosiva letal.",
         "hasTransmission": true,
-        "trans_url": "assets/video/aura_video.mp4",
+        "trans_url": "assets/video/jarre-equinoxe-4.webm"
     },
     {
         "name": "GLACIER VI",

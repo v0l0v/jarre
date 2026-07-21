@@ -214,6 +214,10 @@
             
             const player = document.getElementById('aura-player');
             if (player) {
+                if (fadeInterval) {
+                    clearInterval(fadeInterval);
+                    fadeInterval = null;
+                }
                 if (url && player.src !== url) {
                     player.src = url;
                     player.load();
@@ -229,6 +233,8 @@
             }
         }
 
+        let fadeInterval = null;
+
         function closeAuraModal() {
             isModalOpen = false;
             const modal = document.getElementById('aura-modal');
@@ -238,9 +244,24 @@
             content.classList.add('portal-close');
             
             modal.style.opacity = '0';
+            
+            const player = document.getElementById('aura-player');
+            if (player && !player.paused) {
+                if (fadeInterval) clearInterval(fadeInterval);
+                let vol = player.volume;
+                fadeInterval = setInterval(() => {
+                    vol -= 0.05;
+                    if (vol > 0) {
+                        player.volume = vol;
+                    } else {
+                        player.volume = 0;
+                        clearInterval(fadeInterval);
+                    }
+                }, 75); // Fade out over 1.5 seconds
+            }
+
             setTimeout(() => {
                 modal.style.display = 'none';
-                const player = document.getElementById('aura-player');
                 if (player) {
                     player.pause();
                     player.currentTime = 0;
