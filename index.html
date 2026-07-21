@@ -488,11 +488,7 @@
             document.getElementById('terminal-input').focus();
             const out = document.getElementById('terminal-output');
             out.innerHTML = `<div>SISTEMA DE NAVEGACIÓN ESTELAR (BASH)</div><div>========================================</div>`;
-            out.innerHTML += `<div>Comandos disponibles:</div>`;
-            out.innerHTML += `<div>  ls                 - Lista de planetas y coordenadas</div>`;
-            out.innerHTML += `<div>  cat/view [id]      - Ver detalles de un planeta</div>`;
-            out.innerHTML += `<div>  viajar/jump [id]   - Iniciar viaje a ese planeta</div>`;
-            out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio</div><br/>`;
+            out.innerHTML += `<div>(Escribe 'help' o 'ayuda' para ver los comandos)</div><br/>`;
             out.scrollTop = out.scrollHeight;
         }
 
@@ -510,7 +506,7 @@
                 const out = document.getElementById('terminal-output');
                 out.innerHTML += `<div>> ${rawVal}</div>`;
                 
-                if (val === 'ls') {
+                if (val === 'ls' || val === 'lista') {
                     out.innerHTML += `<div>PLANETAS DISPONIBLES:</div>`;
                     worldPalettes.forEach((w, i) => {
                         const cx = (w.bg % 999).toString().padStart(3, '0');
@@ -518,7 +514,13 @@
                         const cz = (w.c2 % 999).toString().padStart(3, '0');
                         out.innerHTML += `<div>[${i}] ${w.name.padEnd(20, ' ')} - X:${cx} Y:${cy} Z:${cz}</div>`;
                     });
-                } else if (val.startsWith('cat ') || val.startsWith('view ')) {
+                } else if (val === 'help' || val === 'ayuda') {
+                    out.innerHTML += `<div>COMANDOS DISPONIBLES:</div>`;
+                    out.innerHTML += `<div>  ls / lista         - Mostrar lista de planetas y coordenadas</div>`;
+                    out.innerHTML += `<div>  cat / view / ver   - Ver detalles de un planeta (ej: cat 0)</div>`;
+                    out.innerHTML += `<div>  viajar / jump      - Iniciar viaje a un planeta (ej: viajar 1)</div>`;
+                    out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio nuevo</div>`;
+                } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
                         const w = worldPalettes[id];
