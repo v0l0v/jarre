@@ -158,7 +158,8 @@
         #aura-modal-content.portal-open { animation: spaceWarpOpen 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         #aura-modal-content.portal-close { animation: spaceWarpClose 2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
         #aura-modal-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.15; mix-blend-mode: screen; border-radius: 50%; }
-        #aura-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; border-radius: 50%; outline: none; background: #000; }
+        #aura-player, #aura-iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; border-radius: 50%; outline: none; background: #000; border: none; }
+        #aura-iframe { display: none; }
         .crt-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; border-radius: 50%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; pointer-events: none; }
         .vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; border-radius: 50%; background: radial-gradient(circle, transparent 50%, #000 120%); pointer-events: none; }
         .modal-text-content { position: relative; z-index: 5; text-align: center; }
@@ -183,6 +184,7 @@
         <div id="aura-modal-content">
             <button class="close-modal-btn" onclick="closeAuraModal()">CERRAR VISOR</button>
             <video id="aura-player" src="" controls loop playsinline></video>
+            <iframe id="aura-iframe" src=""></iframe>
             <div class="crt-overlay" style="opacity: 0.3;"></div>
             <div class="vignette" style="opacity: 0.5;"></div>
         </div>
@@ -213,22 +215,36 @@
             content.classList.add('portal-open');
             
             const player = document.getElementById('aura-player');
-            if (player) {
-                if (fadeInterval) {
-                    clearInterval(fadeInterval);
-                    fadeInterval = null;
+            const iframe = document.getElementById('aura-iframe');
+            
+            const isHtml = url && (url.endsWith('.html') || url.endsWith('.htm'));
+            
+            if (isHtml) {
+                if (player) { player.pause(); player.style.display = 'none'; }
+                if (iframe) {
+                    iframe.style.display = 'block';
+                    if (iframe.src !== url) iframe.src = url;
                 }
-                if (url && player.src !== url) {
-                    player.src = url;
-                    player.load();
-                }
-                player.muted = false;
-                player.volume = 1.0;
-                const playPromise = player.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.warn("Autoplay prevenido por el navegador, se requiere interacción manual:", error);
-                    });
+            } else {
+                if (iframe) iframe.style.display = 'none';
+                if (player) {
+                    player.style.display = 'block';
+                    if (fadeInterval) {
+                        clearInterval(fadeInterval);
+                        fadeInterval = null;
+                    }
+                    if (url && player.src !== url) {
+                        player.src = url;
+                        player.load();
+                    }
+                    player.muted = false;
+                    player.volume = 1.0;
+                    const playPromise = player.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.warn("Autoplay prevenido por el navegador:", error);
+                        });
+                    }
                 }
             }
         }
@@ -246,7 +262,9 @@
             modal.style.opacity = '0';
             
             const player = document.getElementById('aura-player');
-            if (player && !player.paused) {
+            const iframe = document.getElementById('aura-iframe');
+
+            if (player && !player.paused && player.style.display !== 'none') {
                 if (fadeInterval) clearInterval(fadeInterval);
                 let vol = player.volume;
                 fadeInterval = setInterval(() => {
@@ -257,7 +275,7 @@
                         player.volume = 0;
                         clearInterval(fadeInterval);
                     }
-                }, 75); // Fade out over 1.5 seconds
+                }, 75);
             }
 
             setTimeout(() => {
@@ -265,6 +283,9 @@
                 if (player) {
                     player.pause();
                     player.currentTime = 0;
+                }
+                if (iframe) {
+                    iframe.src = ""; // Stop HTML processing
                 }
             }, 2000);
         }
