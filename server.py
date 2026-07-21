@@ -67,6 +67,43 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode())
             return
+            
+        if self.path == '/api/updateplanets':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_data)
+                if data.get('password') != PASSWORD:
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(b'{"error": "Contrasena incorrecta"}')
+                    return
+                
+                planets_array = data.get('planets')
+                if planets_array is None:
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(b'{"error": "Array de planetas no proporcionado"}')
+                    return
+                
+                planet_str = json.dumps(planets_array, ensure_ascii=False, indent=4)
+                new_content = f"const worldPalettes = {planet_str};\n"
+                
+                with open('planets.js', 'w', encoding='utf-8') as f:
+                    f.write(new_content)
+                    
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(b'{"status": "ok"}')
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode())
+            return
 
 with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
     print(f"Servidor activo con soporte para guardado en el puerto {PORT}")

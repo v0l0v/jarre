@@ -537,35 +537,43 @@
                     
                     out.innerHTML += `<div>Autenticando y guardando en servidor...</div>`;
                     out.scrollTop = out.scrollHeight;
+                    
+                    const endpoint = pendingPlanetData ? '/api/mkplaneta' : '/api/updateplanets';
+                    const bodyData = pendingPlanetData 
+                        ? { password: password, planet: pendingPlanetData }
+                        : { password: password, planets: worldPalettes };
 
-                    fetch('/api/mkplaneta', {
+                    fetch(endpoint, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            password: password,
-                            planet: pendingPlanetData
-                        })
+                        body: JSON.stringify(bodyData)
                     }).then(res => res.json()).then(data => {
                         if (data.status === 'ok') {
-                            worldPalettes.push(pendingPlanetData);
-                            const totalWorlds = worldPalettes.length;
-                            for (let i = 0; i < totalWorlds; i++) {
-                                navMap[i] = {
-                                    right: (i + 1) % totalWorlds,
-                                    left: (i - 1 + totalWorlds) % totalWorlds,
-                                    up: (i + Math.floor(totalWorlds / 2)) % totalWorlds,
-                                    down: (i - Math.floor(totalWorlds / 2) + totalWorlds) % totalWorlds,
-                                    center: (i + 2) % totalWorlds,
-                                    edges: (i - 2 + totalWorlds) % totalWorlds
-                                };
+                            if (pendingPlanetData) {
+                                worldPalettes.push(pendingPlanetData);
+                                const totalWorlds = worldPalettes.length;
+                                for (let i = 0; i < totalWorlds; i++) {
+                                    navMap[i] = {
+                                        right: (i + 1) % totalWorlds,
+                                        left: (i - 1 + totalWorlds) % totalWorlds,
+                                        up: (i + Math.floor(totalWorlds / 2)) % totalWorlds,
+                                        down: (i - Math.floor(totalWorlds / 2) + totalWorlds) % totalWorlds,
+                                        center: (i + 2) % totalWorlds,
+                                        edges: (i - 2 + totalWorlds) % totalWorlds
+                                    };
+                                }
+                                out.innerHTML += `<div>¡Planeta [${worldPalettes.length-1}] ${pendingPlanetData.name} guardado PERMANENTEMENTE!</div>`;
+                            } else {
+                                out.innerHTML += `<div>¡Planeta modificado y guardado PERMANENTEMENTE!</div>`;
                             }
-                            out.innerHTML += `<div>¡Planeta [${worldPalettes.length-1}] ${pendingPlanetData.name} guardado PERMANENTEMENTE!</div>`;
                         } else {
                             out.innerHTML += `<div>Acceso denegado o error: ${data.error}</div>`;
                         }
+                        pendingPlanetData = null;
                         out.scrollTop = out.scrollHeight;
                     }).catch(err => {
-                        out.innerHTML += `<div>Error de conexión. ¿Está el servidor Python (server.py) activo?</div>`;
+                        out.innerHTML += `<div>Error de conexión. ¿Está el servidor Python activo?</div>`;
+                        pendingPlanetData = null;
                         out.scrollTop = out.scrollHeight;
                     });
 
@@ -590,6 +598,7 @@
                     out.innerHTML += `<div>  cat / view / ver   - Ver detalles de un planeta (ej: cat 0)</div>`;
                     out.innerHTML += `<div>  viajar / jump      - Iniciar viaje a un planeta (ej: viajar 1)</div>`;
                     out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio nuevo</div>`;
+                    out.innerHTML += `<div>  set-trans [id] [url]- Cambiar el video de transmisión (ej: set-trans 1 media.mp4)</div>`;
                 } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
@@ -620,6 +629,25 @@
                         document.getElementById('terminal-input').type = 'password';
                     } else {
                         out.innerHTML += `<div>Error: Faltan argumentos. Usa mkplaneta-[nombre].</div>`;
+                    }
+                } else if (val.startsWith('set-trans ')) {
+                    const args = rawVal.split(' ');
+                    if (args.length >= 3) {
+                        const id = parseInt(args[1]);
+                        const url = args.slice(2).join(' '); // allow URLs with spaces just in case
+                        if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
+                            worldPalettes[id].hasTransmission = true;
+                            worldPalettes[id].trans_url = url;
+                            pendingPlanetData = null; // null means we are updating the full array
+                            out.innerHTML += `<div>Modificando datos de ${worldPalettes[id].name}...</div>`;
+                            out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
+                            terminalState = 'awaiting_password';
+                            document.getElementById('terminal-input').type = 'password';
+                        } else {
+                            out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
+                        }
+                    } else {
+                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-trans [id] [ruta/url]</div>`;
                     }
                 } else if (val.startsWith('viajar ') || val.startsWith('jump ')) {
                     const id = parseInt(val.split(' ')[1]);
