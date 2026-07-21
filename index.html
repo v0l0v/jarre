@@ -493,9 +493,11 @@
 
         function openTerminal() {
             document.getElementById('game-terminal').style.display = 'flex';
-            document.getElementById('terminal-input').focus();
+            const input = document.getElementById('terminal-input');
+            input.value = '';
+            input.focus();
             terminalState = 'normal';
-            document.getElementById('terminal-input').type = 'text';
+            input.type = 'text';
             const out = document.getElementById('terminal-output');
             out.innerHTML = `<div>SISTEMA DE NAVEGACIÓN ESTELAR (BASH)</div><div>========================================</div>`;
             out.innerHTML += `<div>(Escribe 'help' o 'ayuda' para ver los comandos)</div><br/>`;
@@ -709,6 +711,7 @@
             keyBuffer += event.key.toLowerCase();
             if (keyBuffer.length > 4) keyBuffer = keyBuffer.slice(-4);
             if (keyBuffer === 'term') {
+                event.preventDefault();
                 openTerminal();
                 keyBuffer = '';
                 return;
