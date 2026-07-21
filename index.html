@@ -316,8 +316,8 @@
         <h1 id="world-title"></h1>
         <p id="world-desc">LABORATORIO VISUAL</p>
         <div id="aura-links">
-            <a href="#" onclick="openAuraModal(); return false;" class="aura-link">Ver Transmisión</a>
-            <a href="#" onclick="openAuraVideoModal(); return false;" class="aura-link">Ver Registro</a>
+            <a href="#" id="btn-transmision" onclick="openAuraModal(); return false;" class="aura-link">Ver Transmisión</a>
+            <a href="#" id="btn-registro" onclick="openAuraVideoModal(); return false;" class="aura-link">Ver Registro</a>
         </div>
     </div>
     
@@ -760,6 +760,8 @@
         document.getElementById('world-title').innerText = initW.name;
         document.getElementById('world-desc').innerText = initW.description || "LABORATORIO VISUAL";
         document.getElementById('aura-links').style.display = initW.hasTransmission ? 'flex' : 'none';
+        document.getElementById('btn-transmision').style.display = initW.trans_url ? 'inline-block' : 'none';
+        document.getElementById('btn-registro').style.display = initW.reg_url ? 'inline-block' : 'none';
         if (initW.hasTransmission) {
             const p1 = document.getElementById('aura-transmision-player');
             const p2 = document.getElementById('aura-video-player');
@@ -989,6 +991,9 @@
             document.getElementById('world-title').innerText = w.name;
             document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
             document.getElementById('aura-links').style.display = w.hasTransmission ? 'flex' : 'none';
+            document.getElementById('btn-transmision').style.display = w.trans_url ? 'inline-block' : 'none';
+            document.getElementById('btn-registro').style.display = w.reg_url ? 'inline-block' : 'none';
+            
             if (w.hasTransmission) {
                 const p1 = document.getElementById('aura-transmision-player');
                 const p2 = document.getElementById('aura-video-player');

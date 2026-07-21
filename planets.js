@@ -1,40 +1,65 @@
 const worldPalettes = [
-    { 
-        name: "NEON PRIME I", 
-        bg: 0x0a0515, c1: 0xff0055, c2: 0x00eeff, c3: 0x5500ff, type: 'neon',
-        description: "Ciudad distópica de luces de neón.",
-        hasTransmission: false
-    }, 
-    { 
-        name: "AURA II", 
-        bg: 0x110011, c1: 0xff00ff, c2: 0xaa00ff, c3: 0xff88ff, type: 'aura',
-        description: "Estación de transmisión anómala detectada.",
-        hasTransmission: true,
-        trans_url: "assets/video/aura_video.mp4",
-        reg_url: "assets/video/auraii.mp4"
-    },    
-    { 
-        name: "SOLARIS III", 
-        bg: 0x1a0a00, c1: 0xff8800, c2: 0xffd700, c3: 0xff0000, type: 'fire',
-        description: "Superficie en constante ignición.",
-        hasTransmission: false
+    {
+        "name": "NEON PRIME I",
+        "bg": 656661,
+        "c1": 16711765,
+        "c2": 61183,
+        "c3": 5570815,
+        "type": "neon",
+        "description": "Ciudad distópica de luces de neón.",
+        "hasTransmission": false
     },
-    { 
-        name: "TERRA NOVA IV", 
-        bg: 0x001100, c1: 0x00ff00, c2: 0x004400, c3: 0x88cc00, type: 'terra',
-        description: "Flora hiper-evolucionada.",
-        hasTransmission: false
+    {
+        "name": "AURA II",
+        "bg": 1114129,
+        "c1": 16711935,
+        "c2": 11141375,
+        "c3": 16746751,
+        "type": "aura",
+        "description": "Estación de transmisión anómala detectada.",
+        "hasTransmission": true,
+        "trans_url": "assets/video/aura_video.mp4",
+        "reg_url": "assets/video/auraii.mp4"
     },
-    { 
-        name: "TOX V", 
-        bg: 0x001105, c1: 0x00ff00, c2: 0x0088ff, c3: 0xccff00, type: 'toxic',
-        description: "Atmósfera corrosiva letal.",
-        hasTransmission: false
-    },   
-    { 
-        name: "GLACIER VI", 
-        bg: 0x000511, c1: 0x00ffff, c2: 0xffffff, c3: 0x0055ff, type: 'ice',
-        description: "Páramo congelado absoluto.",
-        hasTransmission: false
-    }     
+    {
+        "name": "SOLARIS III",
+        "bg": 1706496,
+        "c1": 16746496,
+        "c2": 16766720,
+        "c3": 16711680,
+        "type": "fire",
+        "description": "Superficie en constante ignición.",
+        "hasTransmission": false
+    },
+    {
+        "name": "TERRA NOVA IV",
+        "bg": 4352,
+        "c1": 65280,
+        "c2": 17408,
+        "c3": 8965120,
+        "type": "terra",
+        "description": "Flora hiper-evolucionada.",
+        "hasTransmission": false
+    },
+    {
+        "name": "TOX V",
+        "bg": 4357,
+        "c1": 65280,
+        "c2": 35071,
+        "c3": 13434624,
+        "type": "toxic",
+        "description": "Atmósfera corrosiva letal.",
+        "hasTransmission": true,
+        "trans_url": "assets/video/aura_video.mp4"
+    },
+    {
+        "name": "GLACIER VI",
+        "bg": 1297,
+        "c1": 65535,
+        "c2": 16777215,
+        "c3": 22015,
+        "type": "ice",
+        "description": "Páramo congelado absoluto.",
+        "hasTransmission": false
+    }
 ];
