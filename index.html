@@ -631,7 +631,8 @@
                     out.innerHTML += `<div>  cat / view / ver   - Ver detalles de un planeta (ej: cat 0)</div>`;
                     out.innerHTML += `<div>  viajar / jump      - Iniciar viaje a un planeta (ej: viajar 1)</div>`;
                     out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio nuevo</div>`;
-                    out.innerHTML += `<div>  set-trans [id] [url|active|deactivate] - Gestionar transmisión del planeta</div>`;
+                    out.innerHTML += `<div>  set-trans [id] [url|active|deactivate] - Gestionar transmisión (video ppal)</div>`;
+                    out.innerHTML += `<div>  set-reg [id] [url|active|deactivate]   - Gestionar registro (video secundario)</div>`;
                 } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
@@ -673,10 +674,12 @@
                         if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
                             if (actionLower === 'active') {
                                 worldPalettes[id].hasTransmission = true;
+                                if (!worldPalettes[id].trans_url) worldPalettes[id].trans_url = "assets/video/aura_video.mp4";
                                 out.innerHTML += `<div>Activando transmisión en ${worldPalettes[id].name}...</div>`;
                             } else if (actionLower === 'deactivate') {
-                                worldPalettes[id].hasTransmission = false;
+                                delete worldPalettes[id].trans_url;
                                 out.innerHTML += `<div>Desactivando transmisión en ${worldPalettes[id].name}...</div>`;
+                                if (!worldPalettes[id].reg_url) worldPalettes[id].hasTransmission = false;
                             } else {
                                 worldPalettes[id].hasTransmission = true;
                                 worldPalettes[id].trans_url = actionOrUrl;
@@ -692,6 +695,38 @@
                         }
                     } else {
                         out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-trans [id] [active|deactivate|url]</div>`;
+                    }
+                } else if (val.startsWith('set-reg ')) {
+                    const args = rawVal.split(' ');
+                    if (args.length >= 3) {
+                        const id = parseInt(args[1]);
+                        const actionOrUrl = args.slice(2).join(' '); // allow URLs with spaces
+                        const actionLower = actionOrUrl.toLowerCase();
+                        
+                        if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
+                            worldPalettes[id].hasTransmission = true; // Flag maestro para mostrar el div principal
+                            if (actionLower === 'active') {
+                                if (!worldPalettes[id].reg_url) worldPalettes[id].reg_url = "assets/video/auraii.mp4"; // un por defecto
+                                out.innerHTML += `<div>Activando registro en ${worldPalettes[id].name}...</div>`;
+                            } else if (actionLower === 'deactivate') {
+                                delete worldPalettes[id].reg_url;
+                                out.innerHTML += `<div>Desactivando registro en ${worldPalettes[id].name}...</div>`;
+                                // Si también está desactivada la transmisión principal, apagar la flag global
+                                if (!worldPalettes[id].trans_url) worldPalettes[id].hasTransmission = false;
+                            } else {
+                                worldPalettes[id].reg_url = actionOrUrl;
+                                out.innerHTML += `<div>Modificando URL de registro en ${worldPalettes[id].name}...</div>`;
+                            }
+                            
+                            pendingPlanetData = null; // null means we are updating the full array
+                            out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
+                            terminalState = 'awaiting_password';
+                            document.getElementById('terminal-input').type = 'password';
+                        } else {
+                            out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
+                        }
+                    } else {
+                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-reg [id] [active|deactivate|url]</div>`;
                     }
                 } else if (val.startsWith('viajar ') || val.startsWith('jump ')) {
                     const id = parseInt(val.split(' ')[1]);
