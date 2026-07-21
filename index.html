@@ -191,7 +191,20 @@
     </div>
 
     <script>
+        let isModalOpen = false;
+        
+        function toggleFullScreen(elem) {
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
         function openAuraModal() {
+            isModalOpen = true;
             const modal = document.getElementById('aura-modal');
             const content = document.getElementById('aura-modal-content');
             modal.style.display = 'flex';
@@ -215,6 +228,7 @@
         }
 
         function closeAuraModal() {
+            isModalOpen = false;
             const modal = document.getElementById('aura-modal');
             const content = document.getElementById('aura-modal-content');
             
@@ -232,6 +246,7 @@
             }, 2000);
         }
         function openAuraVideoModal() {
+            isModalOpen = true;
             const modal = document.getElementById('aura-video-modal');
             const content = document.getElementById('aura-video-modal-content');
             modal.style.display = 'flex';
@@ -255,6 +270,7 @@
         }
 
         function closeAuraVideoModal() {
+            isModalOpen = false;
             const modal = document.getElementById('aura-video-modal');
             const content = document.getElementById('aura-video-modal-content');
             
@@ -313,6 +329,10 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
+
+        // Fullscreen toggle en doble click
+        document.getElementById('aura-transmision-player').addEventListener('dblclick', function() { toggleFullScreen(this); });
+        document.getElementById('aura-video-player').addEventListener('dblclick', function() { toggleFullScreen(this); });
 
         // Variables de ratón
         let mouseX = 0;
@@ -495,7 +515,8 @@
             }
         }
 
-        document.addEventListener('dblclick', () => {
+        document.addEventListener('dblclick', (e) => {
+            if (isModalOpen) return;
             initAudio();
             triggerJump();
         });
@@ -680,6 +701,14 @@
 
         document.addEventListener('keydown', (event) => {
             initAudio();
+            
+            if (isModalOpen) {
+                if (event.key === 'Escape') {
+                    if (document.getElementById('aura-modal').style.display === 'flex') closeAuraModal();
+                    if (document.getElementById('aura-video-modal').style.display === 'flex') closeAuraVideoModal();
+                }
+                return;
+            }
             
             const term = document.getElementById('game-terminal');
             if (term.style.display === 'flex') {
@@ -887,6 +916,7 @@
         const mouseVector = new THREE.Vector2();
 
         document.addEventListener('click', (event) => {
+            if (isModalOpen) return;
             initAudio();
             if (!portal.visible) return;
             
@@ -1057,6 +1087,7 @@
 
         // Eventos de usuario
         function onDocumentMouseMove(event) {
+            if (isModalOpen) return;
             mouseX = event.clientX - windowHalfX;
             mouseY = event.clientY - windowHalfY;
             
@@ -1068,6 +1099,7 @@
         }
         let lastTapTime = 0;
         function onDocumentTouchStart(event) {
+            if (isModalOpen) return;
             initAudio();
             if (event.touches.length === 1) {
                 const now = new Date().getTime();
@@ -1097,6 +1129,7 @@
             }
         }
         function onDocumentTouchMove(event) {
+            if (isModalOpen) return;
             if (event.touches.length === 1) {
                 mouseX = event.touches[0].pageX - windowHalfX;
                 mouseY = event.touches[0].pageY - windowHalfY;
