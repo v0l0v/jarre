@@ -487,14 +487,12 @@
             document.getElementById('game-terminal').style.display = 'flex';
             document.getElementById('terminal-input').focus();
             const out = document.getElementById('terminal-output');
-            out.innerHTML = `<div>SISTEMA DE NAVEGACIÓN ESTELAR</div><div>================================</div>`;
-            out.innerHTML += `<div>Escribe 'viajar [numero]' para ir a un planeta.</div><br/>`;
-            worldPalettes.forEach((w, i) => {
-                const cx = (w.bg % 999).toString().padStart(3, '0');
-                const cy = (w.c1 % 999).toString().padStart(3, '0');
-                const cz = (w.c2 % 999).toString().padStart(3, '0');
-                out.innerHTML += `<div>[${i}] ${w.name.padEnd(20, ' ')} - CORDENADAS: X:${cx} Y:${cy} Z:${cz}</div>`;
-            });
+            out.innerHTML = `<div>SISTEMA DE NAVEGACIÓN ESTELAR (BASH)</div><div>========================================</div>`;
+            out.innerHTML += `<div>Comandos disponibles:</div>`;
+            out.innerHTML += `<div>  ls                 - Lista de planetas y coordenadas</div>`;
+            out.innerHTML += `<div>  cat/view [id]      - Ver detalles de un planeta</div>`;
+            out.innerHTML += `<div>  viajar/jump [id]   - Iniciar viaje a ese planeta</div>`;
+            out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio</div><br/>`;
             out.scrollTop = out.scrollHeight;
         }
 
@@ -504,14 +502,65 @@
 
         document.getElementById('terminal-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                const val = e.target.value.trim().toLowerCase();
+                const rawVal = e.target.value.trim();
+                const val = rawVal.toLowerCase();
                 e.target.value = '';
                 if (!val) return;
                 
                 const out = document.getElementById('terminal-output');
-                out.innerHTML += `<div>> ${val}</div>`;
+                out.innerHTML += `<div>> ${rawVal}</div>`;
                 
-                if (val.startsWith('viajar ')) {
+                if (val === 'ls') {
+                    out.innerHTML += `<div>PLANETAS DISPONIBLES:</div>`;
+                    worldPalettes.forEach((w, i) => {
+                        const cx = (w.bg % 999).toString().padStart(3, '0');
+                        const cy = (w.c1 % 999).toString().padStart(3, '0');
+                        const cz = (w.c2 % 999).toString().padStart(3, '0');
+                        out.innerHTML += `<div>[${i}] ${w.name.padEnd(20, ' ')} - X:${cx} Y:${cy} Z:${cz}</div>`;
+                    });
+                } else if (val.startsWith('cat ') || val.startsWith('view ')) {
+                    const id = parseInt(val.split(' ')[1]);
+                    if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
+                        const w = worldPalettes[id];
+                        out.innerHTML += `<div>DATOS DE ${w.name}:</div>`;
+                        out.innerHTML += `<div>Descripción: ${w.description || 'Sin descripción'}</div>`;
+                        out.innerHTML += `<div>Transmisión: ${w.hasTransmission ? 'Activa' : 'Ninguna'}</div>`;
+                        out.innerHTML += `<div>Tipo de Entorno: ${w.type || 'Desconocido'}</div>`;
+                    } else {
+                        out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
+                    }
+                } else if (val.startsWith('mkplaneta-')) {
+                    const nombre = rawVal.substring(10).toUpperCase().trim();
+                    if (nombre) {
+                        const newPlanet = {
+                            name: nombre,
+                            bg: Math.floor(Math.random()*0xffffff),
+                            c1: Math.floor(Math.random()*0xffffff),
+                            c2: Math.floor(Math.random()*0xffffff),
+                            c3: Math.floor(Math.random()*0xffffff),
+                            type: ['neon','fire','toxic','ice','terra'][Math.floor(Math.random()*5)],
+                            description: "Planeta generado por consola.",
+                            hasTransmission: false
+                        };
+                        worldPalettes.push(newPlanet);
+                        
+                        // Regenerar navMap para que sea visitable por atajos o flechas
+                        const totalWorlds = worldPalettes.length;
+                        for (let i = 0; i < totalWorlds; i++) {
+                            navMap[i] = {
+                                right: (i + 1) % totalWorlds,
+                                left: (i - 1 + totalWorlds) % totalWorlds,
+                                up: (i + Math.floor(totalWorlds / 2)) % totalWorlds,
+                                down: (i - Math.floor(totalWorlds / 2) + totalWorlds) % totalWorlds,
+                                center: (i + 2) % totalWorlds,
+                                edges: (i - 2 + totalWorlds) % totalWorlds
+                            };
+                        }
+                        out.innerHTML += `<div>¡Planeta [${worldPalettes.length-1}] ${nombre} creado! (Sesión actual).</div>`;
+                    } else {
+                        out.innerHTML += `<div>Error: Faltan argumentos. Usa mkplaneta-[nombre].</div>`;
+                    }
+                } else if (val.startsWith('viajar ') || val.startsWith('jump ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
                         out.innerHTML += `<div>Iniciando salto a ${worldPalettes[id].name}...</div>`;
@@ -523,7 +572,7 @@
                         out.innerHTML += `<div>Error: Destino desconocido.</div>`;
                     }
                 } else {
-                    out.innerHTML += `<div>Comando desconocido. Usa 'viajar [numero]'.</div>`;
+                    out.innerHTML += `<div>Comando desconocido.</div>`;
                 }
                 out.scrollTop = out.scrollHeight;
             }
