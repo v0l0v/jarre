@@ -153,12 +153,12 @@
             color: #ccc;
         }
         /* Modal AURA Transmission */
-        #aura-modal, #aura-video-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(0, 0, 0, 0.3); justify-content: center; align-items: center; opacity: 0; transition: opacity 2s ease; }
-        #aura-modal-content, #aura-video-modal-content { position: relative; width: min(80vw, 80vh); height: min(80vw, 80vh); border-radius: 50%; overflow: hidden; border: 2px solid rgba(0, 238, 255, 0.5); box-shadow: 0 0 50px rgba(0, 238, 255, 0.4), inset 0 0 20px rgba(0,238,255,0.5); display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; background: #000; }
-        #aura-modal-content.portal-open, #aura-video-modal-content.portal-open { animation: spaceWarpOpen 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-        #aura-modal-content.portal-close, #aura-video-modal-content.portal-close { animation: spaceWarpClose 2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
+        #aura-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(0, 0, 0, 0.3); justify-content: center; align-items: center; opacity: 0; transition: opacity 2s ease; }
+        #aura-modal-content { position: relative; width: min(80vw, 80vh); height: min(80vw, 80vh); border-radius: 50%; overflow: hidden; border: 2px solid rgba(0, 238, 255, 0.5); box-shadow: 0 0 50px rgba(0, 238, 255, 0.4), inset 0 0 20px rgba(0,238,255,0.5); display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; background: #000; }
+        #aura-modal-content.portal-open { animation: spaceWarpOpen 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        #aura-modal-content.portal-close { animation: spaceWarpClose 2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
         #aura-modal-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.15; mix-blend-mode: screen; border-radius: 50%; }
-        #aura-video-player, #aura-transmision-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; border-radius: 50%; outline: none; background: #000; }
+        #aura-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; border-radius: 50%; outline: none; background: #000; }
         .crt-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; border-radius: 50%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; pointer-events: none; }
         .vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; border-radius: 50%; background: radial-gradient(circle, transparent 50%, #000 120%); pointer-events: none; }
         .modal-text-content { position: relative; z-index: 5; text-align: center; }
@@ -181,16 +181,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
     <div id="aura-modal">
         <div id="aura-modal-content">
-            <button class="close-modal-btn" onclick="closeAuraModal()">CERRAR TRANSMISIÓN</button>
-            <video id="aura-transmision-player" src="assets/video/aura_video.mp4" controls loop playsinline></video>
-            <div class="crt-overlay" style="opacity: 0.3;"></div>
-            <div class="vignette" style="opacity: 0.5;"></div>
-        </div>
-    </div>
-    <div id="aura-video-modal">
-        <div id="aura-video-modal-content">
-            <button class="close-modal-btn" onclick="closeAuraVideoModal()">CERRAR REGISTRO</button>
-            <video id="aura-video-player" src="assets/video/auraii.mp4" controls loop playsinline></video>
+            <button class="close-modal-btn" onclick="closeAuraModal()">CERRAR VISOR</button>
+            <video id="aura-player" src="" controls loop playsinline></video>
             <div class="crt-overlay" style="opacity: 0.3;"></div>
             <div class="vignette" style="opacity: 0.5;"></div>
         </div>
@@ -209,7 +201,7 @@
             }
         }
         
-        function openAuraModal() {
+        function openAuraModal(url) {
             isModalOpen = true;
             const modal = document.getElementById('aura-modal');
             const content = document.getElementById('aura-modal-content');
@@ -220,8 +212,12 @@
             content.classList.remove('portal-close');
             content.classList.add('portal-open');
             
-            const player = document.getElementById('aura-transmision-player');
+            const player = document.getElementById('aura-player');
             if (player) {
+                if (url && player.src !== url) {
+                    player.src = url;
+                    player.load();
+                }
                 player.muted = false;
                 player.volume = 1.0;
                 const playPromise = player.play();
@@ -244,51 +240,11 @@
             modal.style.opacity = '0';
             setTimeout(() => {
                 modal.style.display = 'none';
-                const player = document.getElementById('aura-transmision-player');
+                const player = document.getElementById('aura-player');
                 if (player) {
                     player.pause();
                     player.currentTime = 0;
                 }
-            }, 2000);
-        }
-        function openAuraVideoModal() {
-            isModalOpen = true;
-            const modal = document.getElementById('aura-video-modal');
-            const content = document.getElementById('aura-video-modal-content');
-            modal.style.display = 'flex';
-            void modal.offsetWidth;
-            modal.style.opacity = '1';
-            
-            content.classList.remove('portal-close');
-            content.classList.add('portal-open');
-            
-            const player = document.getElementById('aura-video-player');
-            if (player) {
-                player.muted = false;
-                player.volume = 1.0;
-                const playPromise = player.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.warn("Autoplay prevenido por el navegador, se requiere interacción manual:", error);
-                    });
-                }
-            }
-        }
-
-        function closeAuraVideoModal() {
-            isModalOpen = false;
-            const modal = document.getElementById('aura-video-modal');
-            const content = document.getElementById('aura-video-modal-content');
-            
-            content.classList.remove('portal-open');
-            content.classList.add('portal-close');
-            
-            modal.style.opacity = '0';
-            setTimeout(() => {
-                modal.style.display = 'none';
-                const player = document.getElementById('aura-video-player');
-                player.pause();
-                player.currentTime = 0;
             }, 2000);
         }
     </script>
@@ -316,8 +272,7 @@
         <h1 id="world-title"></h1>
         <p id="world-desc">LABORATORIO VISUAL</p>
         <div id="aura-links">
-            <a href="#" id="btn-transmision" onclick="openAuraModal(); return false;" class="aura-link">Ver Transmisión</a>
-            <a href="#" id="btn-registro" onclick="openAuraVideoModal(); return false;" class="aura-link">Ver Registro</a>
+            <!-- Botones dinámicos se inyectan aquí -->
         </div>
     </div>
     
@@ -343,8 +298,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Fullscreen toggle en doble click
-        document.getElementById('aura-transmision-player').addEventListener('dblclick', function() { toggleFullScreen(this); });
-        document.getElementById('aura-video-player').addEventListener('dblclick', function() { toggleFullScreen(this); });
+        document.getElementById('aura-player').addEventListener('dblclick', function() { toggleFullScreen(this); });
 
         // Variables de ratón
         let mouseX = 0;
@@ -631,16 +585,22 @@
                     out.innerHTML += `<div>  cat / view / ver   - Ver detalles de un planeta (ej: cat 0)</div>`;
                     out.innerHTML += `<div>  viajar / jump      - Iniciar viaje a un planeta (ej: viajar 1)</div>`;
                     out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio nuevo</div>`;
-                    out.innerHTML += `<div>  set-trans [id] [url|active|deactivate] - Gestionar transmisión (video ppal)</div>`;
-                    out.innerHTML += `<div>  set-reg [id] [url|active|deactivate]   - Gestionar registro (video secundario)</div>`;
+                    out.innerHTML += `<div>  add-link [id] [url] [nombre_del_boton] - Añadir un botón multimedia</div>`;
+                    out.innerHTML += `<div>  rm-link [id] [indice_del_boton] - Eliminar un botón (índice 0, 1, 2...)</div>`;
                 } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
                         const w = worldPalettes[id];
-                        out.innerHTML += `<div>DATOS DE ${w.name}:</div>`;
-                        out.innerHTML += `<div>Descripción: ${w.description || 'Sin descripción'}</div>`;
-                        out.innerHTML += `<div>Transmisión: ${w.hasTransmission ? 'Activa' : 'Ninguna'}</div>`;
-                        out.innerHTML += `<div>Tipo de Entorno: ${w.type || 'Desconocido'}</div>`;
+                        let txt = `ID: ${id}\nNombre: ${w.name}\nTipo: ${w.type}\nDesc: ${w.description || "N/A"}\nColor Base: #${w.bg.toString(16)}`;
+                        if (w.trans_url) txt += `\nTransmisión (Legacy): ${w.trans_url}`;
+                        if (w.reg_url) txt += `\nRegistro (Legacy): ${w.reg_url}`;
+                        if (w.links && w.links.length > 0) {
+                            txt += `\nBotones (Links):`;
+                            w.links.forEach((link, idx) => {
+                                txt += `\n  [${idx}] "${link.label}" -> ${link.url}`;
+                            });
+                        }
+                        out.innerHTML += `<div style="white-space: pre-wrap;">${txt}</div>`;
                     } else {
                         out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
                     }
@@ -664,29 +624,20 @@
                     } else {
                         out.innerHTML += `<div>Error: Faltan argumentos. Usa mkplaneta-[nombre].</div>`;
                     }
-                } else if (val.startsWith('set-trans ')) {
+                } else if (val.startsWith('add-link ')) {
+                    // add-link 2 assets/video.mp4 Ver Camara 1
                     const args = rawVal.split(' ');
-                    if (args.length >= 3) {
+                    if (args.length >= 4) {
                         const id = parseInt(args[1]);
-                        const actionOrUrl = args.slice(2).join(' '); // allow URLs with spaces
-                        const actionLower = actionOrUrl.toLowerCase();
+                        const url = args[2];
+                        const label = args.slice(3).join(' ');
                         
                         if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
-                            if (actionLower === 'active') {
-                                worldPalettes[id].hasTransmission = true;
-                                if (!worldPalettes[id].trans_url) worldPalettes[id].trans_url = "assets/video/aura_video.mp4";
-                                out.innerHTML += `<div>Activando transmisión en ${worldPalettes[id].name}...</div>`;
-                            } else if (actionLower === 'deactivate') {
-                                delete worldPalettes[id].trans_url;
-                                out.innerHTML += `<div>Desactivando transmisión en ${worldPalettes[id].name}...</div>`;
-                                if (!worldPalettes[id].reg_url) worldPalettes[id].hasTransmission = false;
-                            } else {
-                                worldPalettes[id].hasTransmission = true;
-                                worldPalettes[id].trans_url = actionOrUrl;
-                                out.innerHTML += `<div>Modificando URL de transmisión en ${worldPalettes[id].name}...</div>`;
-                            }
+                            if (!worldPalettes[id].links) worldPalettes[id].links = [];
+                            worldPalettes[id].links.push({ url: url, label: label });
+                            out.innerHTML += `<div>Añadiendo botón "${label}" en ${worldPalettes[id].name}...</div>`;
                             
-                            pendingPlanetData = null; // null means we are updating the full array
+                            pendingPlanetData = null; 
                             out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
                             terminalState = 'awaiting_password';
                             document.getElementById('terminal-input').type = 'password';
@@ -694,39 +645,32 @@
                             out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
                         }
                     } else {
-                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-trans [id] [active|deactivate|url]</div>`;
+                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: add-link [id] [url] [Nombre del botón]</div>`;
                     }
-                } else if (val.startsWith('set-reg ')) {
+                } else if (val.startsWith('rm-link ')) {
                     const args = rawVal.split(' ');
-                    if (args.length >= 3) {
+                    if (args.length === 3) {
                         const id = parseInt(args[1]);
-                        const actionOrUrl = args.slice(2).join(' '); // allow URLs with spaces
-                        const actionLower = actionOrUrl.toLowerCase();
+                        const linkIdx = parseInt(args[2]);
                         
                         if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
-                            worldPalettes[id].hasTransmission = true; // Flag maestro para mostrar el div principal
-                            if (actionLower === 'active') {
-                                if (!worldPalettes[id].reg_url) worldPalettes[id].reg_url = "assets/video/auraii.mp4"; // un por defecto
-                                out.innerHTML += `<div>Activando registro en ${worldPalettes[id].name}...</div>`;
-                            } else if (actionLower === 'deactivate') {
-                                delete worldPalettes[id].reg_url;
-                                out.innerHTML += `<div>Desactivando registro en ${worldPalettes[id].name}...</div>`;
-                                // Si también está desactivada la transmisión principal, apagar la flag global
-                                if (!worldPalettes[id].trans_url) worldPalettes[id].hasTransmission = false;
+                            if (worldPalettes[id].links && !isNaN(linkIdx) && linkIdx >= 0 && linkIdx < worldPalettes[id].links.length) {
+                                const deletedLabel = worldPalettes[id].links[linkIdx].label;
+                                worldPalettes[id].links.splice(linkIdx, 1);
+                                out.innerHTML += `<div>Botón "${deletedLabel}" eliminado en ${worldPalettes[id].name}...</div>`;
+                                
+                                pendingPlanetData = null; 
+                                out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
+                                terminalState = 'awaiting_password';
+                                document.getElementById('terminal-input').type = 'password';
                             } else {
-                                worldPalettes[id].reg_url = actionOrUrl;
-                                out.innerHTML += `<div>Modificando URL de registro en ${worldPalettes[id].name}...</div>`;
+                                out.innerHTML += `<div>Error: Índice de botón inválido. (Usa cat para ver el planeta)</div>`;
                             }
-                            
-                            pendingPlanetData = null; // null means we are updating the full array
-                            out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
-                            terminalState = 'awaiting_password';
-                            document.getElementById('terminal-input').type = 'password';
                         } else {
                             out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
                         }
                     } else {
-                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-reg [id] [active|deactivate|url]</div>`;
+                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: rm-link [id] [indice]</div>`;
                     }
                 } else if (val.startsWith('viajar ') || val.startsWith('jump ')) {
                     const id = parseInt(val.split(' ')[1]);
@@ -752,7 +696,6 @@
             if (isModalOpen) {
                 if (event.key === 'Escape') {
                     if (document.getElementById('aura-modal').style.display === 'flex') closeAuraModal();
-                    if (document.getElementById('aura-video-modal').style.display === 'flex') closeAuraVideoModal();
                 }
                 return;
             }
@@ -791,18 +734,51 @@
         // Los mundos se cargan ahora desde el archivo externo planets.js
         
         let currentWorld = Math.floor(Math.random() * worldPalettes.length);
+        function renderLinks(world) {
+            const container = document.getElementById('aura-links');
+            container.innerHTML = '';
+            let hasLinks = false;
+            
+            // Legacy support
+            if (world.trans_url) {
+                hasLinks = true;
+                const a = document.createElement('a');
+                a.className = 'aura-link';
+                a.href = '#';
+                a.innerText = 'Ver Transmisión';
+                a.onclick = (e) => { e.preventDefault(); openAuraModal(world.trans_url); };
+                container.appendChild(a);
+            }
+            if (world.reg_url) {
+                hasLinks = true;
+                const a = document.createElement('a');
+                a.className = 'aura-link';
+                a.href = '#';
+                a.innerText = 'Ver Registro';
+                a.onclick = (e) => { e.preventDefault(); openAuraModal(world.reg_url); };
+                container.appendChild(a);
+            }
+            
+            // New dynamic links
+            if (world.links && world.links.length > 0) {
+                hasLinks = true;
+                world.links.forEach((link, index) => {
+                    const a = document.createElement('a');
+                    a.className = 'aura-link';
+                    a.href = '#';
+                    a.innerText = link.label;
+                    a.onclick = (e) => { e.preventDefault(); openAuraModal(link.url); };
+                    container.appendChild(a);
+                });
+            }
+            
+            container.style.display = hasLinks ? 'flex' : 'none';
+        }
+
         const initW = worldPalettes[currentWorld];
         document.getElementById('world-title').innerText = initW.name;
         document.getElementById('world-desc').innerText = initW.description || "LABORATORIO VISUAL";
-        document.getElementById('aura-links').style.display = initW.hasTransmission ? 'flex' : 'none';
-        document.getElementById('btn-transmision').style.display = initW.trans_url ? 'inline-block' : 'none';
-        document.getElementById('btn-registro').style.display = initW.reg_url ? 'inline-block' : 'none';
-        if (initW.hasTransmission) {
-            const p1 = document.getElementById('aura-transmision-player');
-            const p2 = document.getElementById('aura-video-player');
-            if (initW.trans_url && p1.src !== initW.trans_url) { p1.src = initW.trans_url; p1.load(); }
-            if (initW.reg_url && p2.src !== initW.reg_url) { p2.src = initW.reg_url; p2.load(); }
-        }
+        renderLinks(initW);
         document.body.style.backgroundColor = '#' + initW.bg.toString(16).padStart(6, '0');
         scene.fog.color.setHex(initW.bg);
 
@@ -1025,16 +1001,7 @@
             document.body.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
             document.getElementById('world-title').innerText = w.name;
             document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
-            document.getElementById('aura-links').style.display = w.hasTransmission ? 'flex' : 'none';
-            document.getElementById('btn-transmision').style.display = w.trans_url ? 'inline-block' : 'none';
-            document.getElementById('btn-registro').style.display = w.reg_url ? 'inline-block' : 'none';
-            
-            if (w.hasTransmission) {
-                const p1 = document.getElementById('aura-transmision-player');
-                const p2 = document.getElementById('aura-video-player');
-                if (w.trans_url && p1.src !== w.trans_url) { p1.src = w.trans_url; p1.load(); }
-                if (w.reg_url && p2.src !== w.reg_url) { p2.src = w.reg_url; p2.load(); }
-            }
+            renderLinks(w);
             
             // Actualizar textura del núcleo al nuevo planeta
             coreMat.map = createPlanetTexture(w);
