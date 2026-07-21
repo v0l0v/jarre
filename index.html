@@ -488,7 +488,7 @@
         
         // Los mundos se cargan ahora desde el archivo externo planets.js
         
-        let currentWorld = Math.floor(Math.random() * 6);
+        let currentWorld = Math.floor(Math.random() * worldPalettes.length);
         const initW = worldPalettes[currentWorld];
         document.getElementById('world-title').innerText = initW.name;
         document.getElementById('world-desc').innerText = initW.description || "LABORATORIO VISUAL";
@@ -501,18 +501,18 @@
         scene.fog.color.setHex(initW.bg);
 
         // Mapa de navegación (grafo topológico personalizado)
-        const navMap = {
-            // Índices de los mundos: 0=1, 1=2, 2=3, 3=4, 4=5, 5=6
-            // Secuencia Vertical (Arriba/Abajo): 1 -> 2 -> 3 -> 4 -> 1
-            // Secuencia Horizontal (Izquierda/Derecha): 1 -> 6 -> 5 -> 3 -> 1
-            // [center, edges, right, left, up, down]
-            0: { center: 2, edges: 0, right: 2, left: 5, up: 1, down: 3 }, // 1 (Frente) -> izq: 6(5), der: 3(2), arr: 2(1), abj: 4(3)
-            1: { center: 3, edges: 1, right: 4, left: 5, up: 2, down: 0 }, // 2 (Arriba)
-            2: { center: 0, edges: 2, right: 4, left: 0, up: 3, down: 1 }, // 3 (Atrás) -> izq: 1(0), der: 5(4), arr: 4(3), abj: 2(1)
-            3: { center: 1, edges: 3, right: 4, left: 5, up: 0, down: 2 }, // 4 (Abajo)
-            4: { center: 5, edges: 4, right: 5, left: 2, up: 1, down: 3 }, // 5 (Derecha) -> izq: 3(2), der: 6(5)
-            5: { center: 4, edges: 5, right: 0, left: 4, up: 1, down: 3 }  // 6 (Izquierda) -> izq: 5(4), der: 1(0)
-        };
+        const navMap = {};
+        const totalWorlds = worldPalettes.length;
+        for (let i = 0; i < totalWorlds; i++) {
+            navMap[i] = {
+                right: (i + 1) % totalWorlds,
+                left: (i - 1 + totalWorlds) % totalWorlds,
+                up: (i + Math.floor(totalWorlds / 2)) % totalWorlds,
+                down: (i - Math.floor(totalWorlds / 2) + totalWorlds) % totalWorlds,
+                center: (i + 2) % totalWorlds,
+                edges: (i - 2 + totalWorlds) % totalWorlds
+            };
+        }
         
         let color1 = new THREE.Color(initW.c1);
         let color2 = new THREE.Color(initW.c2);
