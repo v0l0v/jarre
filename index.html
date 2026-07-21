@@ -598,7 +598,7 @@
                     out.innerHTML += `<div>  cat / view / ver   - Ver detalles de un planeta (ej: cat 0)</div>`;
                     out.innerHTML += `<div>  viajar / jump      - Iniciar viaje a un planeta (ej: viajar 1)</div>`;
                     out.innerHTML += `<div>  mkplaneta-[nombre] - Generar un planeta aleatorio nuevo</div>`;
-                    out.innerHTML += `<div>  set-trans [id] [url]- Cambiar el video de transmisión (ej: set-trans 1 media.mp4)</div>`;
+                    out.innerHTML += `<div>  set-trans [id] [url|active|deactivate] - Gestionar transmisión del planeta</div>`;
                 } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
@@ -634,12 +634,23 @@
                     const args = rawVal.split(' ');
                     if (args.length >= 3) {
                         const id = parseInt(args[1]);
-                        const url = args.slice(2).join(' '); // allow URLs with spaces just in case
+                        const actionOrUrl = args.slice(2).join(' '); // allow URLs with spaces
+                        const actionLower = actionOrUrl.toLowerCase();
+                        
                         if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
-                            worldPalettes[id].hasTransmission = true;
-                            worldPalettes[id].trans_url = url;
+                            if (actionLower === 'active') {
+                                worldPalettes[id].hasTransmission = true;
+                                out.innerHTML += `<div>Activando transmisión en ${worldPalettes[id].name}...</div>`;
+                            } else if (actionLower === 'deactivate') {
+                                worldPalettes[id].hasTransmission = false;
+                                out.innerHTML += `<div>Desactivando transmisión en ${worldPalettes[id].name}...</div>`;
+                            } else {
+                                worldPalettes[id].hasTransmission = true;
+                                worldPalettes[id].trans_url = actionOrUrl;
+                                out.innerHTML += `<div>Modificando URL de transmisión en ${worldPalettes[id].name}...</div>`;
+                            }
+                            
                             pendingPlanetData = null; // null means we are updating the full array
-                            out.innerHTML += `<div>Modificando datos de ${worldPalettes[id].name}...</div>`;
                             out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador:</div>`;
                             terminalState = 'awaiting_password';
                             document.getElementById('terminal-input').type = 'password';
@@ -647,7 +658,7 @@
                             out.innerHTML += `<div>Error: Planeta no encontrado.</div>`;
                         }
                     } else {
-                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-trans [id] [ruta/url]</div>`;
+                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: set-trans [id] [active|deactivate|url]</div>`;
                     }
                 } else if (val.startsWith('viajar ') || val.startsWith('jump ')) {
                     const id = parseInt(val.split(' ')[1]);
