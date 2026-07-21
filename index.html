@@ -491,8 +491,12 @@
         let currentWorld = Math.floor(Math.random() * 6);
         const initW = worldPalettes[currentWorld];
         document.getElementById('world-title').innerText = initW.name;
-        document.getElementById('world-desc').innerText = initW.name === "AURA II" ? "Estación de transmisión anómala detectada." : "LABORATORIO VISUAL";
-        document.getElementById('aura-links').style.display = initW.name === "AURA II" ? 'flex' : 'none';
+        document.getElementById('world-desc').innerText = initW.description || "LABORATORIO VISUAL";
+        document.getElementById('aura-links').style.display = initW.hasTransmission ? 'flex' : 'none';
+        if (initW.hasTransmission) {
+            if (initW.trans_url) document.getElementById('aura-transmision-player').src = initW.trans_url;
+            if (initW.reg_url) document.getElementById('aura-video-player').src = initW.reg_url;
+        }
         document.body.style.backgroundColor = '#' + initW.bg.toString(16).padStart(6, '0');
         scene.fog.color.setHex(initW.bg);
 
@@ -690,8 +694,12 @@
             scene.fog.color.setHex(w.bg);
             document.body.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
             document.getElementById('world-title').innerText = w.name;
-            document.getElementById('world-desc').innerText = w.name === "AURA II" ? "Estación de transmisión anómala detectada." : "LABORATORIO VISUAL";
-            document.getElementById('aura-links').style.display = w.name === "AURA II" ? 'flex' : 'none';
+            document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
+            document.getElementById('aura-links').style.display = w.hasTransmission ? 'flex' : 'none';
+            if (w.hasTransmission) {
+                if (w.trans_url) document.getElementById('aura-transmision-player').src = w.trans_url;
+                if (w.reg_url) document.getElementById('aura-video-player').src = w.reg_url;
+            }
             
             // Actualizar textura del núcleo al nuevo planeta
             coreMat.map = createPlanetTexture(w);
