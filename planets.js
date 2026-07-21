@@ -53,12 +53,8 @@ const worldPalettes = [
         "trans_url": "assets/video/jarre-equinoxe-4.webm",
         "links": [
             {
-                "url": "/assts/planeta/toxv/index.html",
-                "label": "Conoce TOX V"
-            },
-            {
                 "url": "assets/planeta/toxv/index.html",
-                "label": "Leer Diario de AURA"
+                "label": "Conoce TOX V"
             }
         ]
     },
