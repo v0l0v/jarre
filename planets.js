@@ -50,7 +50,17 @@ const worldPalettes = [
         "type": "toxic",
         "description": "Atmósfera corrosiva letal.",
         "hasTransmission": true,
-        "trans_url": "assets/video/jarre-equinoxe-4.webm"
+        "trans_url": "assets/video/jarre-equinoxe-4.webm",
+        "links": [
+            {
+                "url": "/assts/planeta/toxv/index.html",
+                "label": "Conoce TOX V"
+            },
+            {
+                "url": "assets/planeta/toxv/index.html",
+                "label": "Leer Diario de AURA"
+            }
+        ]
     },
     {
         "name": "GLACIER VI",
