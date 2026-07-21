@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETC - Locuras Interactivas</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #0a0515; 
+            color: #fff; 
+            font-family: 'Outfit', sans-serif; 
+        }
+        canvas { 
+            display: block; 
+        }
+        #ui {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: auto;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        #aura-links {
+            display: none;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            pointer-events: auto;
+        }
+        .aura-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.05);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            text-transform: uppercase;
+        }
+        .aura-link:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #fff;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+        h1 {
+            font-size: clamp(3rem, 10vw, 8rem);
+            letter-spacing: clamp(0.5rem, 2vw, 2rem);
+            margin: 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(0, 238, 255, 0.4);
+            background: linear-gradient(90deg, #ff0055, #00eeff, #ff0055);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s linear infinite;
+        }
+        p {
+            font-size: clamp(0.8rem, 2vw, 1.2rem);
+            letter-spacing: 0.3rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            font-weight: 300;
+        }
+        .back-btn {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            pointer-events: auto;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 24px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            z-index: 20;
+        }
+        .back-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(255,255,255,0.2);
+        }
+        
+        .hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            opacity: 0.5;
+            text-transform: uppercase;
+            animation: fade-in-out 4s infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        @keyframes fade-in-out {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+        
+        #planet-info {
+            position: absolute;
+            pointer-events: none;
+            background: rgba(10, 5, 21, 0.85);
+            border: 1px solid rgba(0, 238, 255, 0.3);
+            padding: 15px 25px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 30;
+            color: white;
+            text-align: left;
+            transform: translate(20px, 20px); 
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.2);
+        }
+        #planet-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: #00eeff;
+            text-transform: uppercase;
+        }
+        #planet-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            color: #ccc;
+        }
+        /* Modal AURA Transmission */
+        #aura-modal, #aura-video-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); justify-content: center; align-items: center; opacity: 0; transition: opacity 2s ease; }
+        #aura-modal-content, #aura-video-modal-content { position: relative; width: auto; height: auto; max-width: 95vw; max-height: 95vh; border-radius: 20px; overflow: hidden; border: 1px solid rgba(0, 238, 255, 0.3); box-shadow: 0 0 50px rgba(0, 238, 255, 0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; transform: scale(0); opacity: 0; background: #000; }
+        #aura-modal-content.portal-open, #aura-video-modal-content.portal-open { animation: spaceWarpOpen 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        #aura-modal-content.portal-close, #aura-video-modal-content.portal-close { animation: spaceWarpClose 2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
+        #aura-modal-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.15; mix-blend-mode: screen; }
+        #aura-video-player, #aura-transmision-player { max-width: 100%; max-height: 95vh; z-index: 1; border-radius: 20px; outline: none; background: #000; }
+        .crt-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; pointer-events: none; }
+        .vignette { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; background: radial-gradient(circle, transparent 50%, #000 120%); pointer-events: none; }
+        .modal-text-content { position: relative; z-index: 5; text-align: center; }
+        .signal-text { font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; letter-spacing: 0.5rem; margin: 0; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.5), 2px 2px 0px rgba(255, 0, 85, 0.5), -2px -2px 0px rgba(0, 238, 255, 0.5); animation: glitch 2s infinite linear alternate-reverse; }
+        .sub-text { font-size: 1.2rem; font-weight: 300; letter-spacing: 0.3rem; margin-top: 1rem; opacity: 0.7; text-transform: uppercase; animation: blink 3s infinite; }
+        .close-modal-btn { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; font-family: 'Outfit', sans-serif; padding: 10px 20px; border-radius: 5px; cursor: pointer; transition: all 0.3s ease; }
+        .close-modal-btn:hover { background: rgba(255,255,255,0.2); border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        @keyframes glitch { 0% { transform: translate(-2px, 2px); } 20% { transform: translate(-2px, 0); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(-2px, -2px); } 80% { transform: translate(-2px, 2px); } 100% { transform: translate(-2px, 2px); } }
+        @keyframes blink { 0%, 49%, 100% { opacity: 0.7; } 50%, 99% { opacity: 0.2; } }
+        @keyframes spaceWarpOpen { 0% { transform: scale(0) translateZ(-1000px); box-shadow: 0 0 100px 50px rgba(255, 255, 255, 1); filter: contrast(3) brightness(5) hue-rotate(270deg); border-radius: 50%; opacity: 0; } 20% { transform: scale(0.05) translateZ(-500px) scaleX(20); box-shadow: 0 0 150px 80px rgba(0, 255, 255, 0.8); filter: contrast(2) brightness(3) hue-rotate(180deg) blur(2px); border-radius: 50%; opacity: 1; } 50% { transform: scale(1.1) translateZ(100px) scaleX(1); box-shadow: 0 0 80px 20px rgba(0, 238, 255, 0.5); filter: contrast(1.2) brightness(1.5) hue-rotate(90deg); border-radius: 30%; opacity: 1; } 100% { transform: scale(1) translateZ(0); box-shadow: 0 0 50px rgba(0, 238, 255, 0.2); filter: contrast(1) brightness(1) hue-rotate(0deg); border-radius: 20px; opacity: 1; } }
+        @keyframes spaceWarpClose { 0% { transform: scale(1) translateZ(0); opacity: 1; border-radius: 20px; } 50% { transform: scale(1.2) translateZ(200px); box-shadow: 0 0 80px 40px rgba(255, 0, 100, 0.6); filter: hue-rotate(90deg) brightness(2); border-radius: 40%; opacity: 1; } 100% { transform: scale(0) translateZ(-1000px) scaleX(0.1); box-shadow: 0 0 0 0 transparent; filter: brightness(5) blur(20px); opacity: 0; border-radius: 50%; } }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
+    <div id="aura-modal">
+        <div id="aura-modal-content">
+            <button class="close-modal-btn" onclick="closeAuraModal()">CERRAR TRANSMISIÓN</button>
+            <video id="aura-transmision-player" src="assets/video/aura_video.mp4" controls loop playsinline></video>
+            <div class="crt-overlay" style="opacity: 0.3;"></div>
+            <div class="vignette" style="opacity: 0.5;"></div>
+        </div>
+    </div>
+    <div id="aura-video-modal">
+        <div id="aura-video-modal-content">
+            <button class="close-modal-btn" onclick="closeAuraVideoModal()">CERRAR REGISTRO</button>
+            <video id="aura-video-player" src="assets/video/auraii.mp4" controls loop playsinline></video>
+            <div class="crt-overlay" style="opacity: 0.3;"></div>
+            <div class="vignette" style="opacity: 0.5;"></div>
+        </div>
+    </div>
+
+    <script>
+        function openAuraModal() {
+            const modal = document.getElementById('aura-modal');
+            const content = document.getElementById('aura-modal-content');
+            modal.style.display = 'flex';
+            void modal.offsetWidth;
+            modal.style.opacity = '1';
+            
+            content.classList.remove('portal-close');
+            content.classList.add('portal-open');
+            
+            const player = document.getElementById('aura-transmision-player');
+            if (player) player.play();
+        }
+
+        function closeAuraModal() {
+            const modal = document.getElementById('aura-modal');
+            const content = document.getElementById('aura-modal-content');
+            
+            content.classList.remove('portal-open');
+            content.classList.add('portal-close');
+            
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                const player = document.getElementById('aura-transmision-player');
+                if (player) {
+                    player.pause();
+                    player.currentTime = 0;
+                }
+            }, 2000);
+        }
+        function openAuraVideoModal() {
+            const modal = document.getElementById('aura-video-modal');
+            const content = document.getElementById('aura-video-modal-content');
+            modal.style.display = 'flex';
+            void modal.offsetWidth;
+            modal.style.opacity = '1';
+            
+            content.classList.remove('portal-close');
+            content.classList.add('portal-open');
+            
+            const player = document.getElementById('aura-video-player');
+            player.play();
+        }
+
+        function closeAuraVideoModal() {
+            const modal = document.getElementById('aura-video-modal');
+            const content = document.getElementById('aura-video-modal-content');
+            
+            content.classList.remove('portal-open');
+            content.classList.add('portal-close');
+            
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                const player = document.getElementById('aura-video-player');
+                player.pause();
+                player.currentTime = 0;
+            }, 2000);
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← VOLVER AL CINE</a>
+    
+    <div id="ui">
+        <h1 id="world-title"></h1>
+        <p id="world-desc">LABORATORIO VISUAL</p>
+        <div id="aura-links">
+            <a href="#" onclick="openAuraModal(); return false;" class="aura-link">Ver Transmisión</a>
+            <a href="#" onclick="openAuraVideoModal(); return false;" class="aura-link">Ver Registro</a>
+        </div>
+    </div>
+    
+    <div id="planet-info">
+        <h3 id="info-title">NUEVO MUNDO</h3>
+        <p>Haz clic para iniciar el salto hiperespacial</p>
+    </div>
+    
+    <div class="hint">Mueve el ratón para explorar el espacio</div>
+
+    <script>
+        // Configuración base de Active Theory / Three.js style
+        const scene = new THREE.Scene();
+        // Niebla para dar profundidad al fondo
+        scene.fog = new THREE.FogExp2(0x0a0515, 0.0008);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+        camera.position.z = 1200;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Variables de ratón
+        let mouseX = 0;
+        let mouseY = 0;
+        let normMouseX = 0;
+        let normMouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+        
+        const planetInfo = document.getElementById('planet-info');
+        const infoTitle = document.getElementById('info-title');
+        
+        // Variables para la "Velocidad Láser"
+        let isWarpSpeed = false;
+        let warpTimer = 0;
+        let currentSpeed = 1;
+        let targetSpeed = 1;
+        let cameraBaseX = 0;
+        let cameraBaseY = 0;
+        let cameraBaseZ = 1200;
+        let fovTarget = 75;
+        
+        let warpTargetX = 0;
+        let warpTargetY = 0;
+        let warpTargetZ = 1200;
+
+        document.addEventListener('mousemove', onDocumentMouseMove);
+        document.addEventListener('touchstart', onDocumentTouchStart, {passive: true});
+        document.addEventListener('touchmove', onDocumentTouchMove, {passive: true});
+        
+        let pendingWorldIndex = -1;
+        
+        // --- MOTOR DE AUDIO PROCEDURAL (Web Audio API) ---
+        let audioCtx, droneOsc, droneFilter, droneGain;
+        let isAudioInit = false;
+
+        function initAudio() {
+            if (isAudioInit) return;
+            isAudioInit = true;
+            
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            
+            droneOsc = audioCtx.createOscillator();
+            droneFilter = audioCtx.createBiquadFilter();
+            droneGain = audioCtx.createGain();
+            
+            droneOsc.type = 'sawtooth';
+            droneOsc.frequency.setValueAtTime(55, audioCtx.currentTime); 
+            
+            droneFilter.type = 'lowpass';
+            droneFilter.frequency.setValueAtTime(200, audioCtx.currentTime);
+            
+            droneGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            droneGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 2);
+            
+            droneOsc.connect(droneFilter);
+            droneFilter.connect(droneGain);
+            droneGain.connect(audioCtx.destination);
+            
+            droneOsc.start();
+            updateAudioForWorld(worldPalettes[currentWorld]);
+        }
+        
+        function updateAudioForWorld(w) {
+            if (!audioCtx) return;
+            const t = audioCtx.currentTime;
+            
+            if (w.type === 'neon') {
+                droneOsc.type = 'square';
+                droneOsc.frequency.linearRampToValueAtTime(110, t + 1);
+                droneFilter.frequency.linearRampToValueAtTime(800, t + 1);
+            } else if (w.type === 'aura') {
+                droneOsc.type = 'triangle';
+                droneOsc.frequency.linearRampToValueAtTime(130.81, t + 1); 
+                droneFilter.frequency.linearRampToValueAtTime(1200, t + 1);
+            } else if (w.type === 'fire') {
+                droneOsc.type = 'sawtooth';
+                droneOsc.frequency.linearRampToValueAtTime(32.7, t + 1); 
+                droneFilter.frequency.linearRampToValueAtTime(150, t + 1);
+            } else if (w.type === 'terra') {
+                droneOsc.type = 'sine';
+                droneOsc.frequency.linearRampToValueAtTime(82.41, t + 1); 
+                droneFilter.frequency.linearRampToValueAtTime(400, t + 1);
+            } else if (w.type === 'toxic') {
+                droneOsc.type = 'sawtooth';
+                droneOsc.frequency.linearRampToValueAtTime(73.42, t + 1); 
+                droneFilter.frequency.linearRampToValueAtTime(300, t + 1);
+            } else if (w.type === 'ice') {
+                droneOsc.type = 'sine';
+                droneOsc.frequency.linearRampToValueAtTime(261.63, t + 1); 
+                droneFilter.frequency.linearRampToValueAtTime(1000, t + 1);
+            }
+        }
+
+        function playWarpSound(dur) {
+            if (!audioCtx) return;
+            const t = audioCtx.currentTime;
+            
+            const sweepOsc = audioCtx.createOscillator();
+            const sweepGain = audioCtx.createGain();
+            
+            sweepOsc.type = 'sine';
+            sweepOsc.frequency.setValueAtTime(1200, t);
+            sweepOsc.frequency.exponentialRampToValueAtTime(40, t + dur);
+            
+            sweepGain.gain.setValueAtTime(0, t);
+            sweepGain.gain.linearRampToValueAtTime(0.3, t + 0.1);
+            sweepGain.gain.exponentialRampToValueAtTime(0.01, t + dur);
+            
+            sweepOsc.connect(sweepGain);
+            sweepGain.connect(audioCtx.destination);
+            
+            sweepOsc.start(t);
+            sweepOsc.stop(t + dur);
+        }
+
+        function triggerDirectionalJump(direction) {
+            if (isWarpSpeed) return;
+            
+            warpTargetX = 0; warpTargetY = 0; warpTargetZ = 0;
+            const dist = 2800; // Distancia a la cara del "cubo"
+
+            if (direction === 'up') {
+                warpTargetY = dist;
+                pendingWorldIndex = navMap[currentWorld].up;
+            } else if (direction === 'down') {
+                warpTargetY = -dist;
+                pendingWorldIndex = navMap[currentWorld].down;
+            } else if (direction === 'left') {
+                warpTargetX = -dist;
+                pendingWorldIndex = navMap[currentWorld].left;
+            } else if (direction === 'right') {
+                warpTargetX = dist;
+                pendingWorldIndex = navMap[currentWorld].right;
+            } else if (direction === 'center') {
+                warpTargetZ = -dist;
+                pendingWorldIndex = navMap[currentWorld].center;
+            } else if (direction === 'edges') {
+                warpTargetZ = dist;
+                pendingWorldIndex = navMap[currentWorld].edges;
+            }
+            
+            if (pendingWorldIndex === currentWorld) {
+                // Si saltamos a la cara donde ya estamos, simplemente rebotamos al centro
+                warpTargetX = 0; warpTargetY = 0; warpTargetZ = 1200; 
+                pendingWorldIndex = -1;
+            }
+
+            document.getElementById('ui').style.opacity = '0';
+
+            isWarpSpeed = true;
+            warpTimer = 3.5; 
+            portal.visible = false;
+            playWarpSound(3.5);
+        }
+
+        function triggerJump() {
+            let nx = normMouseX; // -1 a 1 (Izquierda a Derecha)
+            let ny = normMouseY; // -1 a 1 (Abajo a Arriba)
+            
+            // Calculamos la distancia para definir las 6 zonas de la pantalla
+            let maxDist = Math.max(Math.abs(nx), Math.abs(ny));
+            let minDist = Math.min(Math.abs(nx), Math.abs(ny));
+
+            if (maxDist < 0.25) {
+                triggerDirectionalJump('center');
+            } else if (minDist > 0.75) {
+                triggerDirectionalJump('edges');
+            } else {
+                if (Math.abs(nx) > Math.abs(ny)) {
+                    if (nx > 0) triggerDirectionalJump('right');
+                    else triggerDirectionalJump('left');
+                } else {
+                    if (ny > 0) triggerDirectionalJump('up');
+                    else triggerDirectionalJump('down');
+                }
+            }
+        }
+
+        document.addEventListener('dblclick', () => {
+            initAudio();
+            triggerJump();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            initAudio();
+            if (isWarpSpeed) return;
+            
+            if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') triggerDirectionalJump('up');
+            else if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') triggerDirectionalJump('down');
+            else if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') triggerDirectionalJump('left');
+            else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') triggerDirectionalJump('right');
+            else if (event.key === 'Enter' || event.key === ' ') {
+                if (portal.visible) changeWorld(pendingWorldIndex);
+            }
+        });
+
+        // Generar un sistema de partículas (15,000 puntos)
+        const geometry = new THREE.BufferGeometry();
+        const particles = 15000;
+        const positions = new Float32Array(particles * 3);
+        const colors = new Float32Array(particles * 3);
+        
+        // 6 Mundos para las 6 caras del cubo direccional numerados del I al VI
+        const worldPalettes = [
+            { name: "NEON PRIME I", bg: 0x0a0515, c1: 0xff0055, c2: 0x00eeff, c3: 0x5500ff, type: 'neon' }, 
+            { name: "AURA II", bg: 0x110011, c1: 0xff00ff, c2: 0xaa00ff, c3: 0xff88ff, type: 'aura' },    
+            { name: "SOLARIS III", bg: 0x1a0a00, c1: 0xff8800, c2: 0xffd700, c3: 0xff0000, type: 'fire' },
+            { name: "TERRA NOVA IV", bg: 0x001100, c1: 0x00ff00, c2: 0x004400, c3: 0x88cc00, type: 'terra' },
+            { name: "TOX V", bg: 0x001105, c1: 0x00ff00, c2: 0x0088ff, c3: 0xccff00, type: 'toxic' },   
+            { name: "GLACIER VI", bg: 0x000511, c1: 0x00ffff, c2: 0xffffff, c3: 0x0055ff, type: 'ice' }     
+        ];
+        
+        let currentWorld = Math.floor(Math.random() * 6);
+        const initW = worldPalettes[currentWorld];
+        document.getElementById('world-title').innerText = initW.name;
+        document.getElementById('world-desc').innerText = initW.name === "AURA II" ? "Estación de transmisión anómala detectada." : "LABORATORIO VISUAL";
+        document.getElementById('aura-links').style.display = initW.name === "AURA II" ? 'flex' : 'none';
+        document.body.style.backgroundColor = '#' + initW.bg.toString(16).padStart(6, '0');
+        scene.fog.color.setHex(initW.bg);
+
+        // Mapa de navegación (grafo topológico personalizado)
+        const navMap = {
+            // Índices de los mundos: 0=1, 1=2, 2=3, 3=4, 4=5, 5=6
+            // Secuencia Vertical (Arriba/Abajo): 1 -> 2 -> 3 -> 4 -> 1
+            // Secuencia Horizontal (Izquierda/Derecha): 1 -> 6 -> 5 -> 3 -> 1
+            // [center, edges, right, left, up, down]
+            0: { center: 2, edges: 0, right: 2, left: 5, up: 1, down: 3 }, // 1 (Frente) -> izq: 6(5), der: 3(2), arr: 2(1), abj: 4(3)
+            1: { center: 3, edges: 1, right: 4, left: 5, up: 2, down: 0 }, // 2 (Arriba)
+            2: { center: 0, edges: 2, right: 4, left: 0, up: 3, down: 1 }, // 3 (Atrás) -> izq: 1(0), der: 5(4), arr: 4(3), abj: 2(1)
+            3: { center: 1, edges: 3, right: 4, left: 5, up: 0, down: 2 }, // 4 (Abajo)
+            4: { center: 5, edges: 4, right: 5, left: 2, up: 1, down: 3 }, // 5 (Derecha) -> izq: 3(2), der: 6(5)
+            5: { center: 4, edges: 5, right: 0, left: 4, up: 1, down: 3 }  // 6 (Izquierda) -> izq: 5(4), der: 1(0)
+        };
+        
+        let color1 = new THREE.Color(initW.c1);
+        let color2 = new THREE.Color(initW.c2);
+        let color3 = new THREE.Color(initW.c3);
+
+        function getHexColor(num) {
+            return '#' + num.toString(16).padStart(6, '0');
+        }
+
+        // Texturizador procedural para los planetas
+        function createPlanetTexture(w) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            const bgStr = getHexColor(w.bg);
+            const c1Str = getHexColor(w.c1);
+            const c2Str = getHexColor(w.c2);
+            const c3Str = getHexColor(w.c3);
+            
+            if (w.type === 'neon') {
+                ctx.fillStyle = bgStr;
+                ctx.fillRect(0,0,512,512);
+                for(let i=0; i<300; i++) {
+                    ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str;
+                    ctx.beginPath();
+                    ctx.arc(Math.random()*512, Math.random()*512, Math.random()*15, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            } else if (w.type === 'fire') {
+                const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 300);
+                grad.addColorStop(0, c2Str);
+                grad.addColorStop(1, bgStr);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0,0,512,512);
+                for(let i=0; i<150; i++) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                    ctx.fillRect(Math.random()*512, Math.random()*512, 100, 5);
+                }
+            } else if (w.type === 'toxic') {
+                ctx.fillStyle = bgStr;
+                ctx.fillRect(0,0,512,512);
+                for(let x=0; x<512; x+=32) {
+                    for(let y=0; y<512; y+=32) {
+                        ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str;
+                        ctx.fillRect(x,y,32,32);
+                    }
+                }
+            } else if (w.type === 'ice') {
+                const grad = ctx.createLinearGradient(0, 0, 512, 512);
+                grad.addColorStop(0, c1Str);
+                grad.addColorStop(1, bgStr);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0,0,512,512);
+                for(let i=0; i<200; i++) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                    ctx.beginPath();
+                    ctx.moveTo(Math.random()*512, Math.random()*512);
+                    ctx.lineTo(Math.random()*512, Math.random()*512);
+                    ctx.lineTo(Math.random()*512, Math.random()*512);
+                    ctx.fill();
+                }
+            } else if (w.type === 'aura') {
+                for(let i=0; i<512; i+=4) {
+                    const r = Math.random();
+                    ctx.fillStyle = r > 0.66 ? c1Str : (r > 0.33 ? c2Str : c3Str);
+                    ctx.fillRect(0, i, 512, 4);
+                }
+            } else if (w.type === 'terra') {
+                ctx.fillStyle = bgStr;
+                ctx.fillRect(0,0,512,512);
+                for(let i=0; i<50; i++) {
+                    ctx.fillStyle = Math.random() > 0.5 ? c1Str : c3Str;
+                    ctx.beginPath();
+                    ctx.arc(Math.random()*512, Math.random()*512, 30+Math.random()*50, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function generateParticles() {
+            for (let i = 0; i < particles; i++) {
+                // Posiciones
+                positions[i * 3] = (Math.random() - 0.5) * 4000;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 4000;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 4000;
+
+                // Colores
+                let mixedColor;
+                const rand = Math.random();
+                if (rand < 0.33) mixedColor = color1.clone().lerp(color2, Math.random());
+                else if (rand < 0.66) mixedColor = color2.clone().lerp(color3, Math.random());
+                else mixedColor = color3.clone().lerp(color1, Math.random());
+
+                colors[i * 3] = mixedColor.r;
+                colors[i * 3 + 1] = mixedColor.g;
+                colors[i * 3 + 2] = mixedColor.b;
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        }
+        generateParticles();
+
+        const material = new THREE.PointsMaterial({
+            size: 3,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            depthTest: false,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const particleSystem = new THREE.Points(geometry, material);
+        scene.add(particleSystem);
+
+        // Núcleo (Planeta Actual)
+        const coreGeo = new THREE.SphereGeometry(250, 32, 32);
+        const coreMat = new THREE.MeshBasicMaterial({ 
+            color: 0xffffff, 
+            transparent: true, 
+            opacity: 0.8,
+            map: createPlanetTexture(worldPalettes[currentWorld])
+        });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        scene.add(core);
+
+        // Esfera Portal (Mundo alternativo)
+        const portalGeo = new THREE.SphereGeometry(150, 32, 32);
+        const portalMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
+        const portal = new THREE.Mesh(portalGeo, portalMat);
+        portal.visible = false;
+        scene.add(portal);
+
+        function updatePortalAppearance(idx) {
+            const targetWorld = worldPalettes[idx];
+            portalMat.map = createPlanetTexture(targetWorld);
+            portalMat.needsUpdate = true;
+        }
+
+        // Raycaster para interacciones
+        const raycaster = new THREE.Raycaster();
+        const mouseVector = new THREE.Vector2();
+
+        document.addEventListener('click', (event) => {
+            initAudio();
+            if (!portal.visible) return;
+            
+            // Reutilizamos normMouseX y normMouseY del event listener de movimiento
+            mouseVector.x = normMouseX;
+            mouseVector.y = normMouseY;
+            
+            raycaster.setFromCamera(mouseVector, camera);
+            const intersects = raycaster.intersectObject(portal);
+            
+            if (intersects.length > 0) {
+                changeWorld(pendingWorldIndex);
+            }
+        });
+
+        function changeWorld(idx) {
+            currentWorld = idx;
+            portal.visible = false;
+            
+            // Disparar un salto hiperespacial de retorno para camuflar la transición
+            isWarpSpeed = true;
+            warpTimer = 2.0;
+            warpTargetX = 0;
+            warpTargetY = 0;
+            warpTargetZ = 1200; // Volvemos al centro
+            pendingWorldIndex = -1;
+
+            playWarpSound(2.0);
+
+            const w = worldPalettes[currentWorld];
+            updateAudioForWorld(w);
+            
+            scene.fog.color.setHex(w.bg);
+            document.body.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
+            document.getElementById('world-title').innerText = w.name;
+            document.getElementById('world-desc').innerText = w.name === "AURA II" ? "Estación de transmisión anómala detectada." : "LABORATORIO VISUAL";
+            document.getElementById('aura-links').style.display = w.name === "AURA II" ? 'flex' : 'none';
+            
+            // Actualizar textura del núcleo al nuevo planeta
+            coreMat.map = createPlanetTexture(w);
+            coreMat.needsUpdate = true;
+            
+            color1.setHex(w.c1);
+            color2.setHex(w.c2);
+            color3.setHex(w.c3);
+            generateParticles();
+        }
+
+        // Bucle de animación (60fps)
+        const clock = new THREE.Clock();
+        let accumulatedTime = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+            const delta = clock.getDelta();
+            const timeRaw = clock.getElapsedTime();
+            
+            // Lógica de Velocidad Láser y desplazamiento
+            if (isWarpSpeed) {
+                warpTimer -= delta;
+                targetSpeed = 15.0; 
+                fovTarget = 140; 
+                
+                // Mover base de la cámara hacia el objetivo aleatorio
+                cameraBaseX += (warpTargetX - cameraBaseX) * 0.03;
+                cameraBaseY += (warpTargetY - cameraBaseY) * 0.03;
+                cameraBaseZ += (warpTargetZ - cameraBaseZ) * 0.03;
+
+                if (warpTimer <= 0) {
+                    isWarpSpeed = false;
+                    // Al detenerse en una de las caras, aparece el portal del mundo destino frente a la cámara
+                    if (pendingWorldIndex !== -1 && !portal.visible) {
+                        updatePortalAppearance(pendingWorldIndex);
+                        // La cámara está en warpTarget (aprox). Ponemos el portal frente a ella.
+                        portal.position.set(
+                            cameraBaseX * 0.8,
+                            cameraBaseY * 0.8,
+                            cameraBaseZ * 0.8
+                        );
+                        portal.visible = true;
+                    } else if (pendingWorldIndex === -1) {
+                        document.getElementById('ui').style.opacity = '1';
+                    }
+                }
+            } else {
+                targetSpeed = 1.0;
+                fovTarget = 75;
+                // La cámara vuelve lentamente a la órbita base (1200) si no hay portal a la vista
+                if (!portal.visible) {
+                    cameraBaseX += (0 - cameraBaseX) * 0.005;
+                    cameraBaseY += (0 - cameraBaseY) * 0.005;
+                    cameraBaseZ += (1200 - cameraBaseZ) * 0.005;
+                }
+            }
+            
+            // Inercia de frenada / aceleración
+            currentSpeed += (targetSpeed - currentSpeed) * 0.03;
+            camera.fov += (fovTarget - camera.fov) * 0.03;
+            camera.updateProjectionMatrix();
+
+            accumulatedTime += delta * currentSpeed * 0.1;
+            const time = accumulatedTime;
+
+            // Rotación general
+            particleSystem.rotation.y = time;
+            particleSystem.rotation.z = time * 0.5;
+            core.rotation.x = time * 2;
+            core.rotation.y = time * 3;
+
+            // Animación del portal
+            if (portal.visible) {
+                portal.rotation.y += 0.05;
+                portal.scale.setScalar(1.0 + Math.sin(timeRaw * 5) * 0.1);
+            }
+
+            // Físicas de cámara y Parallax
+            targetX = mouseX * 1.5;
+            targetY = mouseY * 1.5;
+            
+            camera.position.x = cameraBaseX + targetX;
+            camera.position.y = cameraBaseY - targetY;
+            camera.position.z = cameraBaseZ; 
+            
+            // Siempre miramos al centro del universo
+            camera.lookAt(scene.position);
+            
+            // Raycasting en tiempo real para el portal (Cursor y Tooltip HUD)
+            if (portal.visible) {
+                mouseVector.x = normMouseX;
+                mouseVector.y = normMouseY;
+                raycaster.setFromCamera(mouseVector, camera);
+                const intersects = raycaster.intersectObject(portal);
+                
+                if (intersects.length > 0) {
+                    document.body.style.cursor = 'crosshair';
+                    planetInfo.style.opacity = '1';
+                    const targetWorld = worldPalettes[pendingWorldIndex];
+                    infoTitle.innerText = "SECTOR: " + targetWorld.name;
+                } else {
+                    document.body.style.cursor = 'default';
+                    planetInfo.style.opacity = '0';
+                }
+            } else {
+                document.body.style.cursor = 'default';
+                planetInfo.style.opacity = '0';
+            }
+
+            // Deformar partículas sutilmente
+            const posArray = particleSystem.geometry.attributes.position.array;
+            for(let i = 0; i < particles * 3; i += 3) {
+                posArray[i] += Math.sin(time * 5 + posArray[i+1] * 0.005) * 0.3;
+                posArray[i+1] += Math.cos(time * 5 + posArray[i] * 0.005) * 0.3;
+            }
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        // Eventos de usuario
+        function onDocumentMouseMove(event) {
+            mouseX = event.clientX - windowHalfX;
+            mouseY = event.clientY - windowHalfY;
+            
+            normMouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            normMouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            planetInfo.style.left = event.clientX + 'px';
+            planetInfo.style.top = event.clientY + 'px';
+        }
+        let lastTapTime = 0;
+        function onDocumentTouchStart(event) {
+            initAudio();
+            if (event.touches.length === 1) {
+                const now = new Date().getTime();
+                const timeDiff = now - lastTapTime;
+                
+                mouseX = event.touches[0].pageX - windowHalfX;
+                mouseY = event.touches[0].pageY - windowHalfY;
+                normMouseX = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
+                normMouseY = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
+                
+                if (timeDiff < 300 && timeDiff > 0) {
+                    // Doble toque en móviles detectado
+                    triggerJump();
+                } else {
+                    // Toque simple, intentamos hacer clic en el portal
+                    if (portal.visible) {
+                        mouseVector.x = normMouseX;
+                        mouseVector.y = normMouseY;
+                        raycaster.setFromCamera(mouseVector, camera);
+                        const intersects = raycaster.intersectObject(portal);
+                        if (intersects.length > 0) {
+                            changeWorld(pendingWorldIndex);
+                        }
+                    }
+                }
+                lastTapTime = now;
+            }
+        }
+        function onDocumentTouchMove(event) {
+            if (event.touches.length === 1) {
+                mouseX = event.touches[0].pageX - windowHalfX;
+                mouseY = event.touches[0].pageY - windowHalfY;
+                normMouseX = (event.touches[0].pageX / window.innerWidth) * 2 - 1;
+                normMouseY = -(event.touches[0].pageY / window.innerHeight) * 2 + 1;
+            }
+        }
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
