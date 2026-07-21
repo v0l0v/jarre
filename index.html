@@ -202,7 +202,16 @@
             content.classList.add('portal-open');
             
             const player = document.getElementById('aura-transmision-player');
-            if (player) player.play();
+            if (player) {
+                player.muted = false;
+                player.volume = 1.0;
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.warn("Autoplay prevenido por el navegador, se requiere interacción manual:", error);
+                    });
+                }
+            }
         }
 
         function closeAuraModal() {
@@ -233,7 +242,16 @@
             content.classList.add('portal-open');
             
             const player = document.getElementById('aura-video-player');
-            player.play();
+            if (player) {
+                player.muted = false;
+                player.volume = 1.0;
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.warn("Autoplay prevenido por el navegador, se requiere interacción manual:", error);
+                    });
+                }
+            }
         }
 
         function closeAuraVideoModal() {
