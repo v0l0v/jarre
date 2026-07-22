@@ -1778,7 +1778,8 @@
 
         function closeMap(jumping = false) {
             document.getElementById('game-map').style.display = 'none';
-            if (!jumping && !isWarpSpeed && activeNeighbors.length === 0) {
+            const inCrossroads = alternativePortals.some(p => p.mesh.visible);
+            if (!jumping && !isWarpSpeed && !inCrossroads) {
                 // Restaurar textos al cerrar el mapa sin viajar y sin estar en la encrucijada
                 const uiDiv = document.getElementById('ui');
                 uiDiv.style.display = 'block';
