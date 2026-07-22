@@ -63,7 +63,7 @@ const worldPalettes = [
         "description": "Planeta generado por consola."
     },
     {
-        "name": "JMJARRE10",
+        "name": "JMJARRE 10",
         "bg": 5788950,
         "c1": 14138094,
         "c2": 14178227,
