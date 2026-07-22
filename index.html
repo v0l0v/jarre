@@ -866,8 +866,16 @@
             return '#' + num.toString(16).padStart(6, '0');
         }
 
-        // Texturizador procedural para los planetas
         function createPlanetTexture(w) {
+            if (w.texture_url) {
+                const loader = new THREE.TextureLoader();
+                // Opcional: configurar la textura para que se envuelva bien si es equirectangular
+                const texture = loader.load(w.texture_url);
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                return texture;
+            }
+
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;

@@ -67,5 +67,16 @@ const worldPalettes = [
         "type": "ice",
         "description": "Páramo congelado absoluto.",
         "hasTransmission": false
+    },
+    {
+        "name": "ESPEJISMO 9",
+        "bg": 1452458,
+        "c1": 578022,
+        "c2": 10021682,
+        "c3": 14734055,
+        "type": "toxic",
+        "description": "Planeta generado por consola.",
+        "hasTransmission": true,
+        "texture_url": "assets/planeta/espejismo9/textura.jpg"
     }
 ];

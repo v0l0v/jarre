@@ -37,6 +37,9 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
                 planet_str = json.dumps(new_planet, ensure_ascii=False, indent=4)
                 
+                # Indentar cada línea con 4 espacios para que coincida con la estructura del array
+                planet_str = '\n'.join('    ' + line for line in planet_str.split('\n'))
+                
                 # Find the end of the array to inject the new planet
                 insertion_point = content.rfind(']')
                 if insertion_point != -1:
