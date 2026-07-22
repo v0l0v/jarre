@@ -1542,8 +1542,9 @@
 
             // Raycasting en tiempo real para portales alternativos (hover y cursor)
             let hoveredIdx = -1;
+            const isMapVisible = document.getElementById('game-map').style.display === 'flex';
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
-            if (visibleMeshes.length > 0) {
+            if (!isMapVisible && visibleMeshes.length > 0) {
                 mouseVector.x = normMouseX;
                 mouseVector.y = normMouseY;
                 raycaster.setFromCamera(mouseVector, camera);
@@ -1597,6 +1598,8 @@
         // Eventos de usuario
         function onDocumentMouseMove(event) {
             if (isModalOpen) return;
+            if (document.getElementById('game-map').style.display === 'flex') return;
+            
             mouseX = event.clientX - windowHalfX;
             mouseY = event.clientY - windowHalfY;
             
