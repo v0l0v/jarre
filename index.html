@@ -1391,12 +1391,24 @@
             let changes = 0;
             const maxChanges = 15;
             isAbsurdWarping = true;
+            
+            // Ocultar toda la interfaz
+            document.querySelectorAll('.random-warp-btn, .fullscreen-btn, .hud-btn, #ui').forEach(el => {
+                el.style.display = 'none';
+            });
+            
             absurdWarpInterval = setInterval(() => {
                 let randIdx = Math.floor(Math.random() * worldPalettes.length);
                 changes++;
                 if (changes >= maxChanges) {
                     clearInterval(absurdWarpInterval);
                     isAbsurdWarping = false;
+                    
+                    // Restaurar la interfaz
+                    document.querySelectorAll('.random-warp-btn, .fullscreen-btn, .hud-btn, #ui').forEach(el => {
+                        el.style.display = ''; // Restaura el valor por defecto del css
+                    });
+                    
                     changeWorld(randIdx, false); // El último salto hace el "viaje de retorno"
                 } else {
                     changeWorld(randIdx, true); // Cambiar sin reiniciar warp
@@ -1464,8 +1476,11 @@
             // Asegurarnos de que el núcleo y la UI sean visibles al llegar
             core.visible = true;
             const uiDiv = document.getElementById('ui');
-            uiDiv.style.display = 'block';
-            uiDiv.style.visibility = 'visible';
+            
+            if (typeof isAbsurdWarping === 'undefined' || !isAbsurdWarping) {
+                uiDiv.style.display = 'block';
+                uiDiv.style.visibility = 'visible';
+            }
             // opacity se animará por CSS o en el render loop
             
             color1.setHex(w.c1);
