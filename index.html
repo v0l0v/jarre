@@ -578,11 +578,6 @@
 
             warpTargetX = 0; warpTargetY = 0; 
             warpTargetZ = 3500; 
-            
-            const mapEl = document.getElementById('game-map');
-            if (mapEl.style.display === 'flex') {
-                closeMap(true);
-            }
 
             document.getElementById('ui').style.opacity = '0';
 
@@ -618,6 +613,7 @@
 
         document.addEventListener('dblclick', (e) => {
             if (isModalOpen) return;
+            if (document.getElementById('game-map').style.display === 'flex') return;
             initAudio();
             triggerJump();
         });
@@ -965,6 +961,7 @@
             }
 
             if (isWarpSpeed) return;
+            if (document.getElementById('game-map').style.display === 'flex') return;
             
             if (event.key === 'ArrowUp') triggerDirectionalJump('up');
             else if (event.key === 'ArrowDown') triggerDirectionalJump('down');
