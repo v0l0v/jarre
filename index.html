@@ -1759,8 +1759,8 @@
 
         function closeMap(jumping = false) {
             document.getElementById('game-map').style.display = 'none';
-            if (!jumping) {
-                // Restaurar textos al cerrar el mapa sin viajar
+            if (!jumping && !isWarpSpeed) {
+                // Restaurar textos al cerrar el mapa sin viajar y sin estar ya de viaje
                 const uiDiv = document.getElementById('ui');
                 uiDiv.style.display = 'block';
                 uiDiv.style.opacity = '1';
