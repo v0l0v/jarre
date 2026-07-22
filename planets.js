@@ -36,7 +36,7 @@ const worldPalettes = [
         "description": "Flora hiper-evolucionada."
     },
     {
-        "name": "TOX 5",
+        "name": "TOX 4",
         "bg": 4357,
         "c1": 65280,
         "c2": 35071,
