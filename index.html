@@ -1022,10 +1022,6 @@
             const container = document.getElementById('aura-links');
             container.innerHTML = '';
             
-            if (typeof isAbsurdWarping !== 'undefined' && isAbsurdWarping) {
-                return;
-            }
-            
             const normName = world.name.toLowerCase().replace(/ /g, '');
             const folderName = normName;
             const pAssets = planetAssetsMap[folderName];
@@ -1378,7 +1374,6 @@
         });
 
         let absurdWarpInterval;
-        let isAbsurdWarping = false;
         function randomAbsurdWarp() {
             initAudio();
             if (isWarpSpeed || isModalOpen) return;
@@ -1390,28 +1385,12 @@
             
             let changes = 0;
             const maxChanges = 15;
-            isAbsurdWarping = true;
-            
-            // Ocultar toda la interfaz
-            document.querySelectorAll('.random-warp-btn, .fullscreen-btn, .hud-btn, #ui').forEach(el => {
-                el.style.display = 'none';
-            });
-            
             absurdWarpInterval = setInterval(() => {
                 let randIdx = Math.floor(Math.random() * worldPalettes.length);
+                changeWorld(randIdx, true); // Cambiar sin reiniciar warp
                 changes++;
                 if (changes >= maxChanges) {
                     clearInterval(absurdWarpInterval);
-                    isAbsurdWarping = false;
-                    
-                    // Restaurar la interfaz
-                    document.querySelectorAll('.random-warp-btn, .fullscreen-btn, .hud-btn, #ui').forEach(el => {
-                        el.style.display = ''; // Restaura el valor por defecto del css
-                    });
-                    
-                    changeWorld(randIdx, false); // El último salto hace el "viaje de retorno"
-                } else {
-                    changeWorld(randIdx, true); // Cambiar sin reiniciar warp
                 }
             }, 200);
         }
@@ -1437,15 +1416,8 @@
             
             scene.fog.color.setHex(w.bg);
             document.body.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
-            
-            if (typeof isAbsurdWarping !== 'undefined' && isAbsurdWarping) {
-                document.getElementById('world-title').innerText = "";
-                document.getElementById('world-desc').innerText = "";
-            } else {
-                document.getElementById('world-title').innerText = w.name;
-                document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
-            }
-            
+            document.getElementById('world-title').innerText = w.name;
+            document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
             renderLinks(w);
             
             // Actualizar textura dinámica buscando en los archivos de la API primero
@@ -1476,11 +1448,8 @@
             // Asegurarnos de que el núcleo y la UI sean visibles al llegar
             core.visible = true;
             const uiDiv = document.getElementById('ui');
-            
-            if (typeof isAbsurdWarping === 'undefined' || !isAbsurdWarping) {
-                uiDiv.style.display = 'block';
-                uiDiv.style.visibility = 'visible';
-            }
+            uiDiv.style.display = 'block';
+            uiDiv.style.visibility = 'visible';
             // opacity se animará por CSS o en el render loop
             
             color1.setHex(w.c1);
