@@ -8,6 +8,30 @@ PORT = 8001
 PASSWORD = "80558055"
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        from urllib.parse import urlparse
+        parsed_path = urlparse(self.path)
+        
+        if parsed_path.path == '/api/all_planet_assets':
+            base_dir = os.path.join('assets', 'planeta')
+            assets_dict = {}
+            if os.path.exists(base_dir):
+                for folder in os.listdir(base_dir):
+                    folder_path = os.path.join(base_dir, folder)
+                    if os.path.isdir(folder_path):
+                        assets_dict[folder] = {
+                            "folder": f"assets/planeta/{folder}",
+                            "files": os.listdir(folder_path)
+                        }
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(assets_dict).encode())
+            return
+            
+        super().do_GET()
+
     def do_POST(self):
         if self.path == '/api/mkplaneta':
             content_length = int(self.headers.get('Content-Length', 0))

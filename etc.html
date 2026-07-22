@@ -633,21 +633,40 @@
         const particleSystem = new THREE.Points(geometry, material);
         scene.add(particleSystem);
 
+        function getPlanetGeometry(idx, size) {
+            const w = worldPalettes[idx];
+            if (w && w.name === "ESPEJISMO 9") {
+                return new THREE.BoxGeometry(size * 1.2, size * 1.2, size * 1.2);
+            }
+            if (idx === 0) {
+                return new THREE.SphereGeometry(size, 32, 32);
+            }
+            const shapes = [
+                () => new THREE.BoxGeometry(size * 1.2, size * 1.2, size * 1.2),
+                () => new THREE.DodecahedronGeometry(size),
+                () => new THREE.IcosahedronGeometry(size, 0),
+                () => new THREE.OctahedronGeometry(size, 0),
+                () => new THREE.ConeGeometry(size, size * 1.5, 32),
+                () => new THREE.TorusGeometry(size * 0.8, size * 0.3, 16, 50),
+                () => new THREE.TetrahedronGeometry(size, 0)
+            ];
+            const shapeIdx = (idx * 17 + 5) % shapes.length;
+            return shapes[shapeIdx]();
+        }
+
         // Núcleo (Planeta Actual)
-        const coreGeo = new THREE.SphereGeometry(250, 32, 32);
         const coreMat = new THREE.MeshBasicMaterial({ 
             color: 0xffffff, 
             transparent: true, 
             opacity: 0.8,
             map: createPlanetTexture(worldPalettes[currentWorld])
         });
-        const core = new THREE.Mesh(coreGeo, coreMat);
+        const core = new THREE.Mesh(getPlanetGeometry(currentWorld, 400), coreMat);
         scene.add(core);
 
         // Esfera Portal (Mundo alternativo)
-        const portalGeo = new THREE.SphereGeometry(150, 32, 32);
         const portalMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
-        const portal = new THREE.Mesh(portalGeo, portalMat);
+        const portal = new THREE.Mesh(getPlanetGeometry(0, 150), portalMat);
         portal.visible = false;
         scene.add(portal);
 
@@ -655,6 +674,9 @@
             const targetWorld = worldPalettes[idx];
             portalMat.map = createPlanetTexture(targetWorld);
             portalMat.needsUpdate = true;
+            
+            portal.geometry.dispose();
+            portal.geometry = getPlanetGeometry(idx, 150);
         }
 
         // Raycaster para interacciones
@@ -700,9 +722,12 @@
             document.getElementById('world-desc').innerText = w.name === "AURA II" ? "Estación de transmisión anómala detectada." : "LABORATORIO VISUAL";
             document.getElementById('aura-links').style.display = w.name === "AURA II" ? 'flex' : 'none';
             
-            // Actualizar textura del núcleo al nuevo planeta
+            // Actualizar textura y geometría del núcleo al nuevo planeta
             coreMat.map = createPlanetTexture(w);
             coreMat.needsUpdate = true;
+            
+            core.geometry.dispose();
+            core.geometry = getPlanetGeometry(currentWorld, 400);
             
             color1.setHex(w.c1);
             color2.setHex(w.c2);

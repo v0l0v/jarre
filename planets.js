@@ -1,6 +1,6 @@
 const worldPalettes = [
     {
-        "name": "NEON PRIME 0",
+        "name": "NEON 0",
         "bg": 656661,
         "c1": 16711765,
         "c2": 61183,
@@ -18,8 +18,8 @@ const worldPalettes = [
         "type": "aura",
         "description": "Estación de transmisión anómala detectada.",
         "hasTransmission": true,
-        "trans_url": "assets/video/aura_video.mp4",
-        "reg_url": "assets/video/auraii.mp4"
+        "trans_url": "assets/planeta/aura1/video1.mp4",
+        "reg_url": "assets/planeta/aura1/video2.mp4"
     },
     {
         "name": "SOLARIS 2",
@@ -78,5 +78,17 @@ const worldPalettes = [
         "description": "Planeta generado por consola.",
         "hasTransmission": true,
         "texture_url": "assets/planeta/espejismo9/textura.jpg"
+    },
+    {
+        "name": "JMJARRE10",
+        "bg": 5788950,
+        "c1": 14138094,
+        "c2": 14178227,
+        "c3": 3556942,
+        "type": "ice",
+        "description": "La estructura del universo al descubierto en una sola nota visual.",
+        "hasTransmission": true,
+        "texture_url": "assets/planeta/jmjarre10/textura.png",
+        "trans_url": "assets/planeta/jmjarre10/video1.webm"
     }
 ];

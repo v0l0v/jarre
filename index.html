@@ -165,7 +165,6 @@
             z-index: 30;
             color: white;
             text-align: left;
-            transform: translate(20px, 20px); 
             box-shadow: 0 0 20px rgba(0, 238, 255, 0.2);
         }
         #planet-info h3 {
@@ -214,7 +213,7 @@
         #terminal-input-line { display: flex; align-items: center; }
         #terminal-input-line span { margin-right: 10px; font-size: 1.1rem; }
         #terminal-input { flex: 1; background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 1.1rem; outline: none; text-shadow: 0 0 5px #0f0; }
-        #game-map { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 15, 0.95); z-index: 3000; display: none; flex-direction: column; backdrop-filter: blur(10px); }
+        #game-map { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 3000; display: none; flex-direction: column; }
         #close-map { position: absolute; top: 20px; right: 20px; background: transparent; color: #0ef; border: 1px solid #0ef; padding: 5px 15px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.2rem; z-index: 3010; border-radius: 20px; transition: all 0.3s; }
         #close-map:hover { background: #0ef; color: #000; box-shadow: 0 0 15px #0ef; }
         #map-header { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 3010; text-align: center; }
@@ -229,6 +228,35 @@
         .map-node { position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 3px solid; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .map-node:hover { transform: translate(-50%, -50%) scale(1.3); z-index: 10; box-shadow: 0 0 30px currentColor; }
         .map-node span { position: absolute; bottom: -30px; font-size: 0.8rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 5px #000; pointer-events: none; }
+        .hud-btn {
+            position: fixed;
+            bottom: 30px;
+            background: rgba(10, 5, 21, 0.7);
+            border: 1px solid rgba(0, 238, 255, 0.4);
+            color: rgba(0, 238, 255, 0.8);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            box-shadow: 0 0 10px rgba(0, 238, 255, 0.1);
+        }
+        .hud-btn svg { width: 24px; height: 24px; }
+        .hud-btn:hover {
+            background: rgba(0, 238, 255, 0.2);
+            border-color: #00eeff;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.6);
+            transform: scale(1.1);
+        }
+        #btn-map { left: 20px; }
+        #btn-term { right: 20px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
     <div id="aura-modal">
@@ -394,9 +422,23 @@
         </div>
     </div>
     
+    <button id="btn-map" class="hud-btn" onclick="openMap()" title="Abrir Mapa Estelar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+            <line x1="9" y1="3" x2="9" y2="18"></line>
+            <line x1="15" y1="6" x2="15" y2="21"></line>
+        </svg>
+    </button>
+    <button id="btn-term" class="hud-btn" onclick="openTerminal()" title="Abrir Terminal de BASH">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+        </svg>
+    </button>
+    
     <div id="planet-info">
         <h3 id="info-title">NUEVO MUNDO</h3>
-        <p>Haz clic para iniciar el salto hiperespacial</p>
+        <p id="info-desc">Haz clic para iniciar el salto hiperespacial</p>
     </div>
     
     <div class="hint">Mueve el ratón para explorar el espacio</div>
@@ -430,6 +472,7 @@
         
         const planetInfo = document.getElementById('planet-info');
         const infoTitle = document.getElementById('info-title');
+        const infoDesc = document.getElementById('info-desc');
         
         // Variables para la "Velocidad Láser"
         let isWarpSpeed = false;
@@ -489,43 +532,59 @@
             sweepOsc.stop(t + dur);
         }
 
+        let activeNeighbors = [];
+        let anchorPlanet = null; // Planeta central de la vista
+
         function triggerDirectionalJump(direction) {
             if (isWarpSpeed) return;
             
-            warpTargetX = 0; warpTargetY = 0; warpTargetZ = 0;
-            const dist = 2800; // Distancia a la cara del "cubo"
-
-            if (direction === 'up') {
-                warpTargetY = dist;
-                pendingWorldIndex = navMap[currentWorld].up;
-            } else if (direction === 'down') {
-                warpTargetY = -dist;
-                pendingWorldIndex = navMap[currentWorld].down;
-            } else if (direction === 'left') {
-                warpTargetX = -dist;
-                pendingWorldIndex = navMap[currentWorld].left;
-            } else if (direction === 'right') {
-                warpTargetX = dist;
-                pendingWorldIndex = navMap[currentWorld].right;
-            } else if (direction === 'center') {
-                warpTargetZ = -dist;
-                pendingWorldIndex = navMap[currentWorld].center;
-            } else if (direction === 'edges') {
-                warpTargetZ = dist;
-                pendingWorldIndex = navMap[currentWorld].edges;
-            }
+            const currW = worldPalettes[currentWorld];
+            const currCoords = getPlanetCoords(currW);
             
-            if (pendingWorldIndex === currentWorld) {
-                // Si saltamos a la cara donde ya estamos, simplemente rebotamos al centro
-                warpTargetX = 0; warpTargetY = 0; warpTargetZ = 1200; 
-                pendingWorldIndex = -1;
+            let distances = [];
+            for (let i = 0; i < worldPalettes.length; i++) {
+                if (i === currentWorld) continue;
+                const c = getPlanetCoords(worldPalettes[i]);
+                const dist = Math.sqrt(Math.pow(c.x - currCoords.x, 2) + Math.pow(c.y - currCoords.y, 2) + Math.pow(c.z - currCoords.z, 2));
+                distances.push({ idx: i, dist: dist, coords: c });
             }
+            distances.sort((a, b) => a.dist - b.dist);
+            
+            // 1. Encontrar el planeta más cercano en la dirección indicada
+            let filtered = distances;
+            if (direction === 'up') filtered = distances.filter(d => d.coords.y > currCoords.y);
+            if (direction === 'down') filtered = distances.filter(d => d.coords.y < currCoords.y);
+            if (direction === 'right') filtered = distances.filter(d => d.coords.x > currCoords.x);
+            if (direction === 'left') filtered = distances.filter(d => d.coords.x < currCoords.x);
+            
+            if (filtered.length === 0) filtered = distances;
+
+            // El ancla es el objetivo principal de este salto
+            const anchor = filtered[0];
+            anchorPlanet = anchor;
+
+            // 2. Tomar el ancla y hasta 3 planetas más que estén cerca del ancla en el espacio 3D
+            let anchorDistances = [];
+            for (let i = 0; i < distances.length; i++) {
+                const p = distances[i];
+                if (p.idx === anchor.idx) continue;
+                const distToAnchor = Math.sqrt(Math.pow(p.coords.x - anchor.coords.x, 2) + Math.pow(p.coords.y - anchor.coords.y, 2) + Math.pow(p.coords.z - anchor.coords.z, 2));
+                anchorDistances.push({ ...p, distToAnchor });
+            }
+            anchorDistances.sort((a, b) => a.distToAnchor - b.distToAnchor);
+            
+            // Los vecinos activos serán el ancla + los 3 más cercanos al ancla
+            activeNeighbors = [anchor, ...anchorDistances.slice(0, 3)];
+
+            warpTargetX = 0; warpTargetY = 0; 
+            warpTargetZ = 3500; 
 
             document.getElementById('ui').style.opacity = '0';
 
             isWarpSpeed = true;
             warpTimer = 3.5; 
-            portal.visible = false;
+            alternativePortals.forEach(p => p.mesh.visible = false);
+            document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
             playWarpSound(3.5);
         }
 
@@ -561,6 +620,9 @@
         let keyBuffer = '';
         let terminalState = 'normal';
         let pendingPlanetData = null;
+        let editingPlanetId = -1;
+        const editFields = ['name', 'description', 'type'];
+        let currentEditFieldIndex = 0;
 
         function openTerminal() {
             document.getElementById('game-terminal').style.display = 'flex';
@@ -640,6 +702,42 @@
                     terminalState = 'normal';
                     document.getElementById('terminal-input').type = 'text';
                     return;
+                } else if (terminalState === 'awaiting_edit_decision') {
+                    out.innerHTML += `<div>> ${rawVal}</div>`;
+                    if (val === 'y' || val === 's') {
+                        out.innerHTML += `<div>Introduce nuevo valor para '${editFields[currentEditFieldIndex]}':</div>`;
+                        terminalState = 'awaiting_edit_value';
+                    } else if (val === 'n') {
+                        currentEditFieldIndex++;
+                        if (currentEditFieldIndex < editFields.length) {
+                            out.innerHTML += `<div>¿Quieres editar el campo '${editFields[currentEditFieldIndex]}'? (y/n)</div>`;
+                        } else {
+                            pendingPlanetData = null;
+                            out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador para confirmar cambios:</div>`;
+                            terminalState = 'awaiting_password';
+                            document.getElementById('terminal-input').type = 'password';
+                        }
+                    } else {
+                        out.innerHTML += `<div>Responde 'y' (sí) o 'n' (no).</div>`;
+                    }
+                    out.scrollTop = out.scrollHeight;
+                    return;
+                } else if (terminalState === 'awaiting_edit_value') {
+                    out.innerHTML += `<div>> ${rawVal}</div>`;
+                    worldPalettes[editingPlanetId][editFields[currentEditFieldIndex]] = rawVal;
+                    out.innerHTML += `<div>Campo '${editFields[currentEditFieldIndex]}' actualizado a '${rawVal}'.</div>`;
+                    currentEditFieldIndex++;
+                    if (currentEditFieldIndex < editFields.length) {
+                        out.innerHTML += `<div>¿Quieres editar el campo '${editFields[currentEditFieldIndex]}'? (y/n)</div>`;
+                        terminalState = 'awaiting_edit_decision';
+                    } else {
+                        pendingPlanetData = null;
+                        out.innerHTML += `<div>REQUIERE AUTORIZACIÓN: Introduce contraseña de administrador para confirmar cambios:</div>`;
+                        terminalState = 'awaiting_password';
+                        document.getElementById('terminal-input').type = 'password';
+                    }
+                    out.scrollTop = out.scrollHeight;
+                    return;
                 }
 
                 out.innerHTML += `<div>> ${rawVal}</div>`;
@@ -660,6 +758,7 @@
                     out.innerHTML += `<div>  exit / salir       - Cierra esta terminal de comandos</div>`;
                     out.innerHTML += `<div><br/>================ COMANDOS DE INGENIERÍA ================</div>`;
                     out.innerHTML += `<div>  mkplaneta-[nombre]                   - Crea un mundo nuevo (ej: mkplaneta-Zion)</div>`;
+                    out.innerHTML += `<div>  edit [id]                            - Editor interactivo de campos del planeta</div>`;
                     out.innerHTML += `<div>  add-link [id] [url] [nombre_botón]   - Añade un nuevo botón de transmisión/vídeo</div>`;
                     out.innerHTML += `<div>  rm-link [id] [índice]                - Borra un botón (usa 'cat' para ver índices)</div>`;
                     out.innerHTML += `<div>  set-desc [id] [nueva_descripción...] - Modifica la descripción de un planeta</div>`;
@@ -806,6 +905,22 @@
                     } else {
                         out.innerHTML += `<div>Error: Destino desconocido.</div>`;
                     }
+                } else if (val.startsWith('edit ')) {
+                    const args = rawVal.split(' ');
+                    if (args.length === 2) {
+                        const id = parseInt(args[1]);
+                        if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
+                            editingPlanetId = id;
+                            currentEditFieldIndex = 0;
+                            out.innerHTML += `<div>Iniciando edición interactiva de planeta ${id} (${worldPalettes[id].name})...</div>`;
+                            out.innerHTML += `<div>¿Quieres editar el campo '${editFields[currentEditFieldIndex]}'? (y/n)</div>`;
+                            terminalState = 'awaiting_edit_decision';
+                        } else {
+                            out.innerHTML += `<div>Error: Planeta no encontrado o ID inválido.</div>`;
+                        }
+                    } else {
+                        out.innerHTML += `<div>Error: Argumentos inválidos. Uso: edit [id]</div>`;
+                    }
                 } else {
                     out.innerHTML += `<div>Comando desconocido.</div>`;
                 }
@@ -850,9 +965,6 @@
             else if (event.key === 'ArrowDown') triggerDirectionalJump('down');
             else if (event.key === 'ArrowLeft') triggerDirectionalJump('left');
             else if (event.key === 'ArrowRight') triggerDirectionalJump('right');
-            else if (event.key === 'Enter' || event.key === ' ') {
-                if (portal.visible) changeWorld(pendingWorldIndex);
-            }
         });
 
         // Generar un sistema de partículas (15,000 puntos)
@@ -864,6 +976,15 @@
         // Los mundos se cargan ahora desde el archivo externo planets.js
         
         let currentWorld = Math.floor(Math.random() * worldPalettes.length);
+        let planetAssetsMap = {};
+        
+        fetch('/api/all_planet_assets')
+            .then(res => res.json())
+            .then(data => {
+                planetAssetsMap = data;
+                changeWorld(currentWorld, true); // Refresh to apply initial textures/buttons if ready
+            })
+            .catch(err => console.error("Error cargando assets:", err));
         function renderLinks(world) {
             const container = document.getElementById('aura-links');
             container.innerHTML = '';
@@ -937,10 +1058,7 @@
         function createPlanetTexture(w) {
             if (w.texture_url) {
                 const loader = new THREE.TextureLoader();
-                // Opcional: configurar la textura para que se envuelva bien si es equirectangular
                 const texture = loader.load(w.texture_url);
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.RepeatWrapping;
                 return texture;
             }
 
@@ -1015,6 +1133,59 @@
             return new THREE.CanvasTexture(canvas);
         }
 
+        function getPlanetBase64(w) {
+            // Re-render the canvas quickly to get base64
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; // Smaller resolution for map nodes
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const bgStr = getHexColor(w.bg);
+            const c1Str = getHexColor(w.c1);
+            const c2Str = getHexColor(w.c2);
+            const c3Str = getHexColor(w.c3);
+            
+            if (w.type === 'neon') {
+                ctx.fillStyle = bgStr; ctx.fillRect(0,0,128,128);
+                for(let i=0; i<50; i++) {
+                    ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str;
+                    ctx.beginPath(); ctx.arc(Math.random()*128, Math.random()*128, Math.random()*5, 0, Math.PI*2); ctx.fill();
+                }
+            } else if (w.type === 'fire') {
+                const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 75);
+                grad.addColorStop(0, c2Str); grad.addColorStop(1, bgStr);
+                ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+                for(let i=0; i<30; i++) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(Math.random()*128, Math.random()*128, 25, 2);
+                }
+            } else if (w.type === 'toxic') {
+                ctx.fillStyle = bgStr; ctx.fillRect(0,0,128,128);
+                for(let x=0; x<128; x+=16) {
+                    for(let y=0; y<128; y+=16) {
+                        ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str; ctx.fillRect(x,y,16,16);
+                    }
+                }
+            } else if (w.type === 'ice') {
+                const grad = ctx.createLinearGradient(0, 0, 128, 128);
+                grad.addColorStop(0, c1Str); grad.addColorStop(1, bgStr);
+                ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+                for(let i=0; i<50; i++) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath();
+                    ctx.moveTo(Math.random()*128, Math.random()*128); ctx.lineTo(Math.random()*128, Math.random()*128); ctx.lineTo(Math.random()*128, Math.random()*128); ctx.fill();
+                }
+            } else if (w.type === 'aura') {
+                for(let i=0; i<128; i+=2) {
+                    const r = Math.random(); ctx.fillStyle = r > 0.66 ? c1Str : (r > 0.33 ? c2Str : c3Str); ctx.fillRect(0, i, 128, 2);
+                }
+            } else if (w.type === 'terra') {
+                ctx.fillStyle = bgStr; ctx.fillRect(0,0,128,128);
+                for(let i=0; i<15; i++) {
+                    ctx.fillStyle = Math.random() > 0.5 ? c1Str : c3Str; ctx.beginPath();
+                    ctx.arc(Math.random()*128, Math.random()*128, 10+Math.random()*15, 0, Math.PI*2); ctx.fill();
+                }
+            }
+            return canvas.toDataURL();
+        }
+
         function generateParticles() {
             for (let i = 0; i < particles; i++) {
                 // Posiciones
@@ -1050,28 +1221,48 @@
         const particleSystem = new THREE.Points(geometry, material);
         scene.add(particleSystem);
 
+        function getPlanetGeometry(idx, size) {
+            // Todos esféricos pero con variaciones de tamaño sutiles
+            const sizeVariation = size * (0.8 + ((idx * 17) % 50) / 100.0); 
+            return new THREE.SphereGeometry(sizeVariation, 32, 32);
+        }
+
         // Núcleo (Planeta Actual)
-        const coreGeo = new THREE.SphereGeometry(250, 32, 32);
         const coreMat = new THREE.MeshBasicMaterial({ 
             color: 0xffffff, 
             transparent: true, 
             opacity: 0.8,
             map: createPlanetTexture(worldPalettes[currentWorld])
         });
-        const core = new THREE.Mesh(coreGeo, coreMat);
+        const core = new THREE.Mesh(getPlanetGeometry(currentWorld, 400), coreMat);
         scene.add(core);
 
-        // Esfera Portal (Mundo alternativo)
-        const portalGeo = new THREE.SphereGeometry(150, 32, 32);
-        const portalMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
-        const portal = new THREE.Mesh(portalGeo, portalMat);
-        portal.visible = false;
-        scene.add(portal);
+        // Portales alternativos (hasta 4 vecinos)
+        const alternativePortals = [];
+        for (let i = 0; i < 4; i++) {
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
+            const mesh = new THREE.Mesh(getPlanetGeometry(0, 150), mat);
+            mesh.visible = false;
+            scene.add(mesh);
+            alternativePortals.push({ mesh: mesh, mat: mat, targetIdx: -1 });
+        }
 
-        function updatePortalAppearance(idx) {
+        function updatePortalAppearance(portalObj, idx) {
             const targetWorld = worldPalettes[idx];
-            portalMat.map = createPlanetTexture(targetWorld);
-            portalMat.needsUpdate = true;
+            portalObj.mat.map = createPlanetTexture(targetWorld);
+            portalObj.mat.needsUpdate = true;
+            
+            portalObj.mesh.geometry.dispose();
+            portalObj.mesh.geometry = getPlanetGeometry(idx, 150);
+            portalObj.targetIdx = idx;
+        }
+
+        function getPlanetCoords(w) {
+            return {
+                x: w.bg % 999,
+                y: w.c1 % 999,
+                z: w.c2 % 999
+            };
         }
 
         // Raycaster para interacciones
@@ -1081,17 +1272,32 @@
         document.addEventListener('click', (event) => {
             if (isModalOpen) return;
             initAudio();
-            if (!portal.visible) return;
             
-            // Reutilizamos normMouseX y normMouseY del event listener de movimiento
+            const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+            if (visibleMeshes.length === 0) return;
+            
             mouseVector.x = normMouseX;
             mouseVector.y = normMouseY;
             
             raycaster.setFromCamera(mouseVector, camera);
-            const intersects = raycaster.intersectObject(portal);
+            const intersects = raycaster.intersectObjects(visibleMeshes);
             
             if (intersects.length > 0) {
-                changeWorld(pendingWorldIndex);
+                const clickedMesh = intersects[0].object;
+                const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
+                if (pObj) {
+                    document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
+                    alternativePortals.forEach(p => { if (p !== pObj) p.mesh.visible = false; });
+                    planetInfo.style.opacity = '0';
+                    
+                    isWarpSpeed = true;
+                    warpTimer = 2.0; 
+                    warpTargetX = pObj.mesh.position.x;
+                    warpTargetY = -pObj.mesh.position.y; 
+                    warpTargetZ = pObj.mesh.position.z + 200; 
+                    pendingWorldIndex = pObj.targetIdx;
+                    playWarpSound(2.0);
+                }
             }
         });
 
@@ -1119,7 +1325,8 @@
 
         function changeWorld(idx, skipWarp = false) {
             currentWorld = idx;
-            portal.visible = false;
+            alternativePortals.forEach(p => p.mesh.visible = false);
+            document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
             
             if (!skipWarp) {
                 // Disparar un salto hiperespacial de retorno para camuflar la transición
@@ -1141,9 +1348,37 @@
             document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
             renderLinks(w);
             
-            // Actualizar textura del núcleo al nuevo planeta
-            coreMat.map = createPlanetTexture(w);
+            // Actualizar textura dinámica buscando en los archivos de la API primero
+            const normName = w.name.toLowerCase().replace(/ /g, '');
+            const folderName = normName === 'tox5' ? 'toxv' : normName;
+            const pAssets = planetAssetsMap[folderName];
+            
+            let texFile = null;
+            if (pAssets && pAssets.files) {
+                texFile = pAssets.files.find(f => f.toLowerCase().startsWith('textura.'));
+            }
+            
+            if (texFile) {
+                const loader = new THREE.TextureLoader();
+                const tex = loader.load(`${pAssets.folder}/${texFile}`);
+                // tex.wrapS = THREE.RepeatWrapping; // Removed to support non-power-of-two images
+                // tex.wrapT = THREE.RepeatWrapping;
+                tex.colorSpace = THREE.SRGBColorSpace || THREE.LinearSRGBColorSpace; // In newer three.js
+                coreMat.map = tex;
+            } else {
+                coreMat.map = createPlanetTexture(w);
+            }
             coreMat.needsUpdate = true;
+            
+            core.geometry.dispose();
+            core.geometry = getPlanetGeometry(currentWorld, 400);
+            
+            // Asegurarnos de que el núcleo y la UI sean visibles al llegar
+            core.visible = true;
+            const uiDiv = document.getElementById('ui');
+            uiDiv.style.display = 'block';
+            uiDiv.style.visibility = 'visible';
+            // opacity se animará por CSS o en el render loop
             
             color1.setHex(w.c1);
             color2.setHex(w.c2);
@@ -1177,17 +1412,53 @@
 
                 if (warpTimer <= 0) {
                     isWarpSpeed = false;
-                    // Al detenerse en una de las caras, aparece el portal del mundo destino frente a la cámara
-                    if (pendingWorldIndex !== -1 && !portal.visible) {
-                        updatePortalAppearance(pendingWorldIndex);
-                        // La cámara está en warpTarget (aprox). Ponemos el portal frente a ella.
-                        portal.position.set(
-                            cameraBaseX * 0.8,
-                            cameraBaseY * 0.8,
-                            cameraBaseZ * 0.8
-                        );
-                        portal.visible = true;
-                    } else if (pendingWorldIndex === -1) {
+                    
+                    if (pendingWorldIndex !== -1) {
+                        const target = pendingWorldIndex;
+                        pendingWorldIndex = -1;
+                        cameraBaseX = 0; 
+                        cameraBaseY = 0; 
+                        cameraBaseZ = 1200;
+                        changeWorld(target, true);
+                    }
+                    
+                    // Al llegar al punto panorámico, revelamos los portales vecinos
+                    if (activeNeighbors.length > 0 && anchorPlanet) {
+                        const currCoords = getPlanetCoords(worldPalettes[currentWorld]);
+                        for (let i = 0; i < alternativePortals.length; i++) {
+                            const pObj = alternativePortals[i];
+                            if (i < activeNeighbors.length) {
+                                const n = activeNeighbors[i];
+                                updatePortalAppearance(pObj, n.idx);
+                                
+                                // Centramos la vista en el 'anchorPlanet' (el objetivo en esa dirección)
+                                const dx = n.coords.x - anchorPlanet.coords.x;
+                                const dy = n.coords.y - anchorPlanet.coords.y;
+                                
+                                // Reducimos el spread XY porque estarán mucho más cerca de la cámara para saltar el velo (niebla)
+                                const px = cameraBaseX + (dx * 2.5);
+                                const py = cameraBaseY + (dy * 2.5);
+                                
+                                // Los ponemos cerca de la cámara (z=-800 relativa a la cámara) para que no les afecte la niebla oscura
+                                const pz = cameraBaseZ - 800 - (n.dist * 0.1); 
+                                
+                                pObj.mesh.position.set(px, py, pz);
+                                
+                                // Escalado basado en la distancia para falsear perspectiva sin alejarlos realmente
+                                const scaleMult = Math.max(0.15, 0.8 - (n.dist / 1500));
+                                pObj.mesh.scale.setScalar(scaleMult);
+                                pObj.mesh.userData.baseScale = scaleMult;
+                                pObj.mesh.visible = true;
+                                
+
+                            } else {
+                                pObj.mesh.visible = false;
+
+                            }
+                        }
+                        activeNeighbors = []; 
+                        anchorPlanet = null; // Consumidos
+                    } else if (!alternativePortals[0].mesh.visible) {
                         document.getElementById('ui').style.opacity = '1';
                     }
                 }
@@ -1195,7 +1466,8 @@
                 targetSpeed = 1.0;
                 fovTarget = 75;
                 // La cámara vuelve lentamente a la órbita base (1200) si no hay portal a la vista
-                if (!portal.visible) {
+                const anyVisible = alternativePortals.some(p => p.mesh.visible);
+                if (!anyVisible) {
                     cameraBaseX += (0 - cameraBaseX) * 0.005;
                     cameraBaseY += (0 - cameraBaseY) * 0.005;
                     cameraBaseZ += (1200 - cameraBaseZ) * 0.005;
@@ -1216,13 +1488,7 @@
             core.rotation.x = time * 2;
             core.rotation.y = time * 3;
 
-            // Animación del portal
-            if (portal.visible) {
-                portal.rotation.y += 0.05;
-                portal.scale.setScalar(1.0 + Math.sin(timeRaw * 5) * 0.1);
-            }
-
-            // Físicas de cámara y Parallax
+                        // Físicas de cámara y Parallax
             targetX = mouseX * 1.5;
             targetY = mouseY * 1.5;
             
@@ -1232,19 +1498,28 @@
             
             // Siempre miramos al centro del universo
             camera.lookAt(scene.position);
-            
-            // Raycasting en tiempo real para el portal (Cursor y Tooltip HUD)
-            if (portal.visible) {
+
+            // Raycasting en tiempo real para portales alternativos (hover y cursor)
+            let hoveredIdx = -1;
+            const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+            if (visibleMeshes.length > 0) {
                 mouseVector.x = normMouseX;
                 mouseVector.y = normMouseY;
                 raycaster.setFromCamera(mouseVector, camera);
-                const intersects = raycaster.intersectObject(portal);
-                
+                const intersects = raycaster.intersectObjects(visibleMeshes);
                 if (intersects.length > 0) {
-                    document.body.style.cursor = 'crosshair';
-                    planetInfo.style.opacity = '1';
-                    const targetWorld = worldPalettes[pendingWorldIndex];
-                    infoTitle.innerText = "SECTOR: " + targetWorld.name;
+                    document.body.style.cursor = 'pointer';
+                    const clickedMesh = intersects[0].object;
+                    hoveredIdx = alternativePortals.findIndex(p => p.mesh === clickedMesh);
+                    const pObj = alternativePortals[hoveredIdx];
+                    if (pObj && pObj.targetIdx !== -1) {
+                        const targetWorld = worldPalettes[pObj.targetIdx];
+                        const c = getPlanetCoords(targetWorld);
+                        planetInfo.style.opacity = '1';
+                        infoTitle.innerText = targetWorld.name;
+                        const desc = targetWorld.description || targetWorld.type;
+                        infoDesc.innerHTML = `${desc}<br/><span style="color:#0ff; font-size:0.7rem;">Coordenadas: [X: ${c.x}] [Y: ${c.y}] [Z: ${c.z}]</span>`;
+                    }
                 } else {
                     document.body.style.cursor = 'default';
                     planetInfo.style.opacity = '0';
@@ -1253,6 +1528,19 @@
                 document.body.style.cursor = 'default';
                 planetInfo.style.opacity = '0';
             }
+
+            // Animación y HUD de portales
+            alternativePortals.forEach((pObj, i) => {
+                if (pObj.mesh.visible) {
+                    pObj.mesh.rotation.y += 0.05;
+                    const base = pObj.mesh.userData.baseScale || 1.0;
+                    pObj.mesh.scale.setScalar(base + Math.sin(timeRaw * 5) * 0.1 * base);
+                }
+            });
+
+
+            
+
 
             // Deformar partículas sutilmente
             const posArray = particleSystem.geometry.attributes.position.array;
@@ -1274,8 +1562,18 @@
             normMouseX = (event.clientX / window.innerWidth) * 2 - 1;
             normMouseY = -(event.clientY / window.innerHeight) * 2 + 1;
             
-            planetInfo.style.left = event.clientX + 'px';
-            planetInfo.style.top = event.clientY + 'px';
+            let tx = event.clientX;
+            let ty = event.clientY + 20; // Justo debajo
+            
+            // Límites para que no se salga
+            const w = planetInfo.offsetWidth || 250;
+            const h = planetInfo.offsetHeight || 80;
+            
+            if (tx + w > window.innerWidth) tx = window.innerWidth - w - 10;
+            if (ty + h > window.innerHeight) ty = event.clientY - h - 10; // Si choca abajo, lo pone arriba del ratón
+            
+            planetInfo.style.left = tx + 'px';
+            planetInfo.style.top = ty + 'px';
         }
         let lastTapTime = 0;
         function onDocumentTouchStart(event) {
@@ -1295,13 +1593,18 @@
                     triggerJump();
                 } else {
                     // Toque simple, intentamos hacer clic en el portal
-                    if (portal.visible) {
-                        mouseVector.x = normMouseX;
-                        mouseVector.y = normMouseY;
-                        raycaster.setFromCamera(mouseVector, camera);
-                        const intersects = raycaster.intersectObject(portal);
+                    mouseVector.x = normMouseX;
+                    mouseVector.y = normMouseY;
+                    raycaster.setFromCamera(mouseVector, camera);
+                    const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+                    if (visibleMeshes.length > 0) {
+                        const intersects = raycaster.intersectObjects(visibleMeshes);
                         if (intersects.length > 0) {
-                            changeWorld(pendingWorldIndex);
+                            const clickedMesh = intersects[0].object;
+                            const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
+                            if (pObj) {
+                                changeWorld(pObj.targetIdx);
+                            }
                         }
                     }
                 }
@@ -1345,14 +1648,22 @@
                 
                 node.style.left = x + 'px';
                 node.style.top = y + 'px';
-                node.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
+                node.style.backgroundImage = w.texture_url ? `url(${w.texture_url})` : `url(${getPlanetBase64(w)})`;
+                node.style.backgroundSize = 'cover';
                 node.style.borderColor = '#' + w.c1.toString(16).padStart(6, '0');
                 node.style.color = '#' + w.c1.toString(16).padStart(6, '0'); 
                 node.innerHTML = `<span>${w.name}</span>`;
                 
                 node.onclick = () => {
-                    closeMap();
-                    changeWorld(i);
+                    closeMap(true); // indicamos que estamos saltando
+                    // Volar hacia adelante genéricamente desde el mapa
+                    isWarpSpeed = true;
+                    warpTimer = 2.0;
+                    warpTargetX = (Math.random() - 0.5) * 1000;
+                    warpTargetY = (Math.random() - 0.5) * 1000;
+                    warpTargetZ = -2000; // Volar profundo hacia las estrellas
+                    pendingWorldIndex = i;
+                    playWarpSound(2.0);
                 };
                 
                 node.dataset.x = x;
@@ -1365,14 +1676,27 @@
 
         function openMap() {
             document.getElementById('game-map').style.display = 'flex';
+            // Ocultar nombre y descripción del planeta actual
+            const uiDiv = document.getElementById('ui');
+            uiDiv.style.display = 'none';
+            uiDiv.style.opacity = '0';
+            uiDiv.style.visibility = 'hidden';
+            
             renderMap();
             centerMapOn(currentWorld);
             document.getElementById('map-search').value = '';
             document.getElementById('map-search-results').style.display = 'none';
         }
 
-        function closeMap() {
+        function closeMap(jumping = false) {
             document.getElementById('game-map').style.display = 'none';
+            if (!jumping) {
+                // Restaurar textos al cerrar el mapa sin viajar
+                const uiDiv = document.getElementById('ui');
+                uiDiv.style.display = 'block';
+                uiDiv.style.opacity = '1';
+                uiDiv.style.visibility = 'visible';
+            }
         }
 
         function centerMapOn(index) {
