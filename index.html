@@ -1000,12 +1000,24 @@
         let planetAssetsMap = {};
         
         fetch('/api/all_planet_assets')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('API not available, fallback to static JSON');
+                return res.json();
+            })
             .then(data => {
                 planetAssetsMap = data;
                 changeWorld(currentWorld, true); // Refresh to apply initial textures/buttons if ready
             })
-            .catch(err => console.error("Error cargando assets:", err));
+            .catch(err => {
+                console.log("Servidor local no detectado, usando planet_assets.json...");
+                fetch('planet_assets.json')
+                    .then(res => res.json())
+                    .then(data => {
+                        planetAssetsMap = data;
+                        changeWorld(currentWorld, true);
+                    })
+                    .catch(e => console.error("Error cargando assets:", e));
+            });
         function renderLinks(world) {
             const container = document.getElementById('aura-links');
             container.innerHTML = '';
