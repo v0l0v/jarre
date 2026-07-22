@@ -1043,7 +1043,14 @@
                     const a = document.createElement('a');
                     a.className = 'aura-link';
                     a.href = '#';
-                    a.innerText = (hf.toLowerCase() === 'index.html') ? `CONOCE ${world.name}` : hf.toUpperCase();
+                    if (hf.toLowerCase() === 'index.html') {
+                        a.innerText = `CONOCE ${world.name}`;
+                    } else if (hf.toLowerCase() === 'musica.html') {
+                        a.innerText = 'EMISIÓN MUSICAL';
+                    } else {
+                        // Quitar la extensión .html para que el botón quede más limpio
+                        a.innerText = hf.replace(/\.html$/i, '').toUpperCase();
+                    }
                     a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${hf}`); };
                     container.appendChild(a);
                 });
