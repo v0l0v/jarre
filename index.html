@@ -1008,7 +1008,7 @@
                     a.className = 'aura-link';
                     a.href = '#';
                     a.innerText = (hf.toLowerCase() === 'index.html') ? `CONOCE ${world.name}` : hf.toUpperCase();
-                    a.onclick = (e) => { e.preventDefault(); openAuraIframe(`${folder}/${hf}`); };
+                    a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${hf}`); };
                     container.appendChild(a);
                 });
                 
