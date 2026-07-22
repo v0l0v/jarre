@@ -221,17 +221,44 @@
                 radial-gradient(1px 1px at 50px 160px, #ffffff, rgba(0,0,0,0)),
                 radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
                 radial-gradient(1px 1px at 130px 80px, #ffffff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 160px 120px, #aaaaff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 200px 250px, #ffaaff, rgba(0,0,0,0)),
                 radial-gradient(1px 1px at 250px 100px, #ffffff, rgba(0,0,0,0)),
                 radial-gradient(1px 1px at 290px 190px, #ffffff, rgba(0,0,0,0));
             background-repeat: repeat;
             background-size: 350px 350px;
             animation: stars-drift 120s linear infinite;
         }
+        #game-map::before, #game-map::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        #game-map::before {
+            background-image: 
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 20px, #aaffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 280px 320px, #ffaaff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 320px 110px, #ffffaa, rgba(0,0,0,0));
+            background-size: 400px 400px;
+            animation: stars-drift 80s linear infinite, stars-twinkle 4s ease-in-out infinite alternate;
+        }
+        #game-map::after {
+            background-image: 
+                radial-gradient(3px 3px at 80px 150px, #00ffff, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 200px 50px, #ff00ff, rgba(0,0,0,0)),
+                radial-gradient(3px 3px at 350px 200px, #ffffff, rgba(0,0,0,0));
+            background-size: 500px 500px;
+            animation: stars-drift 160s linear infinite reverse, stars-twinkle 7s ease-in-out infinite alternate-reverse;
+            opacity: 0.5;
+        }
         @keyframes stars-drift {
-            from { background-position: 0 0; }
-            to { background-position: -2000px 1000px; }
+            from { transform: translateY(0); }
+            to { transform: translateY(-500px); }
+        }
+        @keyframes stars-twinkle {
+            0% { opacity: 0.1; }
+            100% { opacity: 1; }
         }
         #close-map { position: absolute; top: 20px; right: 20px; background: transparent; color: #0ef; border: 1px solid #0ef; padding: 5px 15px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.2rem; z-index: 3010; border-radius: 20px; transition: all 0.3s; }
         #close-map:hover { background: #0ef; color: #000; box-shadow: 0 0 15px #0ef; }
