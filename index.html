@@ -1744,7 +1744,18 @@
                 node.className = 'map-node';
                 
                 const r = 80 + i * 40; 
-                const theta = i * 2.1; 
+                
+                // Calcular ángulo cumulativo mezclando estructura y caos orgánico
+                let theta = 0;
+                for (let j = 0; j < i; j++) {
+                    // Cada ciclo de 9 planetas cambiamos de fase
+                    if (Math.floor(j / 9) % 2 === 0) {
+                        theta += 2.094395; // ~120 grados (La Y perfecta estructurada)
+                    } else {
+                        theta += 2.399963; // ~137.5 grados (Ángulo áureo de Fibonacci, orgánico)
+                    }
+                }
+                
                 const x = r * Math.cos(theta);
                 const y = r * Math.sin(theta);
                 
