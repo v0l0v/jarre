@@ -213,7 +213,26 @@
         #terminal-input-line { display: flex; align-items: center; }
         #terminal-input-line span { margin-right: 10px; font-size: 1.1rem; }
         #terminal-input { flex: 1; background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 1.1rem; outline: none; text-shadow: 0 0 5px #0f0; }
-        #game-map { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 3000; display: none; flex-direction: column; }
+        #game-map { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; display: none; flex-direction: column; 
+            background-color: #030108;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 160px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, #aaaaff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 200px 250px, #ffaaff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 250px 100px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 290px 190px, #ffffff, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 350px 350px;
+            animation: stars-drift 120s linear infinite;
+        }
+        @keyframes stars-drift {
+            from { background-position: 0 0; }
+            to { background-position: -2000px 1000px; }
+        }
         #close-map { position: absolute; top: 20px; right: 20px; background: transparent; color: #0ef; border: 1px solid #0ef; padding: 5px 15px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.2rem; z-index: 3010; border-radius: 20px; transition: all 0.3s; }
         #close-map:hover { background: #0ef; color: #000; box-shadow: 0 0 15px #0ef; }
         #map-header { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 3010; text-align: center; }
@@ -1759,8 +1778,8 @@
 
         function closeMap(jumping = false) {
             document.getElementById('game-map').style.display = 'none';
-            if (!jumping && !isWarpSpeed) {
-                // Restaurar textos al cerrar el mapa sin viajar y sin estar ya de viaje
+            if (!jumping && !isWarpSpeed && activeNeighbors.length === 0) {
+                // Restaurar textos al cerrar el mapa sin viajar y sin estar en la encrucijada
                 const uiDiv = document.getElementById('ui');
                 uiDiv.style.display = 'block';
                 uiDiv.style.opacity = '1';
