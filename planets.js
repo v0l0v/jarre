@@ -6,8 +6,7 @@ const worldPalettes = [
         "c2": 61183,
         "c3": 5570815,
         "type": "neon",
-        "description": "Ciudad distópica de luces de neón.",
-        "hasTransmission": false
+        "description": "Ciudad distópica de luces de neón."
     },
     {
         "name": "AURA 1",
@@ -16,10 +15,7 @@ const worldPalettes = [
         "c2": 11141375,
         "c3": 16746751,
         "type": "aura",
-        "description": "Estación de transmisión anómala detectada.",
-        "hasTransmission": true,
-        "trans_url": "assets/planeta/aura1/video1.mp4",
-        "reg_url": "assets/planeta/aura1/video2.mp4"
+        "description": "Estación de transmisión anómala detectada."
     },
     {
         "name": "SOLARIS 2",
@@ -28,8 +24,7 @@ const worldPalettes = [
         "c2": 16766720,
         "c3": 16711680,
         "type": "fire",
-        "description": "Superficie en constante ignición.",
-        "hasTransmission": false
+        "description": "Superficie en constante ignición."
     },
     {
         "name": "TERRA NOVA 3",
@@ -38,8 +33,7 @@ const worldPalettes = [
         "c2": 17408,
         "c3": 8965120,
         "type": "terra",
-        "description": "Flora hiper-evolucionada.",
-        "hasTransmission": false
+        "description": "Flora hiper-evolucionada."
     },
     {
         "name": "TOX 5",
@@ -48,15 +42,7 @@ const worldPalettes = [
         "c2": 35071,
         "c3": 13434624,
         "type": "toxic",
-        "description": "Atmósfera corrosiva letal.",
-        "hasTransmission": true,
-        "trans_url": "assets/video/jarre-equinoxe-4.webm",
-        "links": [
-            {
-                "url": "assets/planeta/toxv/index.html",
-                "label": "Conoce TOX V"
-            }
-        ]
+        "description": "Atmósfera corrosiva letal."
     },
     {
         "name": "GLACIER 5",
@@ -65,8 +51,7 @@ const worldPalettes = [
         "c2": 16777215,
         "c3": 22015,
         "type": "ice",
-        "description": "Páramo congelado absoluto.",
-        "hasTransmission": false
+        "description": "Páramo congelado absoluto."
     },
     {
         "name": "ESPEJISMO 9",
@@ -75,9 +60,7 @@ const worldPalettes = [
         "c2": 10021682,
         "c3": 14734055,
         "type": "toxic",
-        "description": "Planeta generado por consola.",
-        "hasTransmission": true,
-        "texture_url": "assets/planeta/espejismo9/textura.jpg"
+        "description": "Planeta generado por consola."
     },
     {
         "name": "JMJARRE10",
@@ -86,9 +69,6 @@ const worldPalettes = [
         "c2": 14178227,
         "c3": 3556942,
         "type": "ice",
-        "description": "La estructura del universo al descubierto en una sola nota visual.",
-        "hasTransmission": true,
-        "texture_url": "assets/planeta/jmjarre10/textura.png",
-        "trans_url": "assets/planeta/jmjarre10/video1.webm"
+        "description": "La estructura del universo al descubierto en una sola nota visual."
     }
 ];

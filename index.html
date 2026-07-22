@@ -988,39 +988,78 @@
         function renderLinks(world) {
             const container = document.getElementById('aura-links');
             container.innerHTML = '';
+            
+            const normName = world.name.toLowerCase().replace(/ /g, '');
+            const folderName = normName === 'tox5' ? 'toxv' : normName; // mapeo para tox5
+            const pAssets = planetAssetsMap[folderName];
+            
             let hasLinks = false;
             
-            // Legacy support
-            if (world.trans_url) {
-                hasLinks = true;
-                const a = document.createElement('a');
-                a.className = 'aura-link';
-                a.href = '#';
-                a.innerText = 'Ver Transmisión';
-                a.onclick = (e) => { e.preventDefault(); openAuraModal(world.trans_url); };
-                container.appendChild(a);
-            }
-            if (world.reg_url) {
-                hasLinks = true;
-                const a = document.createElement('a');
-                a.className = 'aura-link';
-                a.href = '#';
-                a.innerText = 'Ver Registro';
-                a.onclick = (e) => { e.preventDefault(); openAuraModal(world.reg_url); };
-                container.appendChild(a);
-            }
-            
-            // New dynamic links
-            if (world.links && world.links.length > 0) {
-                hasLinks = true;
-                world.links.forEach((link, index) => {
+            if (pAssets && pAssets.files) {
+                const files = pAssets.files;
+                const folder = pAssets.folder;
+                
+                // HTML Files (Conoce X)
+                const htmlFiles = files.filter(f => f.toLowerCase().endsWith('.html'));
+                htmlFiles.sort();
+                htmlFiles.forEach((hf) => {
+                    hasLinks = true;
                     const a = document.createElement('a');
                     a.className = 'aura-link';
                     a.href = '#';
-                    a.innerText = link.label;
-                    a.onclick = (e) => { e.preventDefault(); openAuraModal(link.url); };
+                    a.innerText = (hf.toLowerCase() === 'index.html') ? `CONOCE ${world.name}` : hf.toUpperCase();
+                    a.onclick = (e) => { e.preventDefault(); openAuraIframe(`${folder}/${hf}`); };
                     container.appendChild(a);
                 });
+                
+                // Videos (Transmisión)
+                const videos = files.filter(f => f.toLowerCase().endsWith('.mp4') || f.toLowerCase().endsWith('.webm'));
+                videos.sort();
+                videos.forEach((vid, i) => {
+                    hasLinks = true;
+                    const a = document.createElement('a');
+                    a.className = 'aura-link';
+                    a.href = '#';
+                    
+                    const playIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+                    a.innerHTML = videos.length > 1 ? `${playIcon} ${i + 1}` : `${playIcon}`;
+                    
+                    a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${vid}`); };
+                    container.appendChild(a);
+                });
+            } else {
+                // Fallback estático (si no hay API o si la carpeta no existe)
+                if (world.trans_url) {
+                    hasLinks = true;
+                    const a = document.createElement('a');
+                    a.className = 'aura-link';
+                    a.href = '#';
+                    const playIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+                    a.innerHTML = `${playIcon}`;
+                    a.onclick = (e) => { e.preventDefault(); openAuraModal(world.trans_url); };
+                    container.appendChild(a);
+                }
+                if (world.reg_url) {
+                    hasLinks = true;
+                    const a = document.createElement('a');
+                    a.className = 'aura-link';
+                    a.href = '#';
+                    const playIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+                    a.innerHTML = `${playIcon} REGISTRO`;
+                    a.onclick = (e) => { e.preventDefault(); openAuraModal(world.reg_url); };
+                    container.appendChild(a);
+                }
+                if (world.links && world.links.length > 0) {
+                    world.links.forEach((link, index) => {
+                        hasLinks = true;
+                        const a = document.createElement('a');
+                        a.className = 'aura-link';
+                        a.href = '#';
+                        a.innerText = link.label;
+                        a.onclick = (e) => { e.preventDefault(); openAuraModal(link.url); };
+                        container.appendChild(a);
+                    });
+                }
             }
             
             container.style.display = hasLinks ? 'flex' : 'none';
