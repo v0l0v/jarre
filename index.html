@@ -324,11 +324,14 @@
             const isHtml = url && (url.endsWith('.html') || url.endsWith('.htm'));
             
             if (isHtml) {
-                content.classList.add('is-document');
                 if (player) { player.pause(); player.style.display = 'none'; }
                 if (iframe) {
+                    iframe.src = url;
                     iframe.style.display = 'block';
-                    if (iframe.src !== url) iframe.src = url;
+                    // Si no es musica.html, usamos formato documento cuadrado
+                    if (!url.toLowerCase().includes('musica.html')) {
+                        content.classList.add('is-document');
+                    }
                 }
             } else {
                 content.classList.remove('is-document');
