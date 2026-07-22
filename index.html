@@ -1674,9 +1674,12 @@
         let mapDragStartX = 0;
         let mapDragStartY = 0;
 
+        let mapBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
         function renderMap() {
             const content = document.getElementById('map-content');
             content.innerHTML = '';
+            
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             
             worldPalettes.forEach((w, i) => {
                 const node = document.createElement('div');
@@ -1686,6 +1689,11 @@
                 const theta = i * 2.1; 
                 const x = r * Math.cos(theta);
                 const y = r * Math.sin(theta);
+                
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
                 
                 node.style.left = x + 'px';
                 node.style.top = y + 'px';
@@ -1713,6 +1721,8 @@
                 
                 content.appendChild(node);
             });
+            
+            mapBounds = { minX, maxX, minY, maxY };
         }
 
         function openMap() {
@@ -1755,6 +1765,33 @@
         }
 
         function updateMapTransform() {
+            const margin = 100;
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+            
+            let maxPanX = margin - mapBounds.minX - screenW/2;
+            let minPanX = screenW - margin - mapBounds.maxX - screenW/2;
+            
+            if (minPanX > maxPanX) {
+                const temp = minPanX;
+                minPanX = maxPanX;
+                maxPanX = temp;
+            }
+            
+            let maxPanY = margin - mapBounds.minY - screenH/2;
+            let minPanY = screenH - margin - mapBounds.maxY - screenH/2;
+            
+            if (minPanY > maxPanY) {
+                const temp = minPanY;
+                minPanY = maxPanY;
+                maxPanY = temp;
+            }
+            
+            if (mapPanX > maxPanX) mapPanX = maxPanX;
+            if (mapPanX < minPanX) mapPanX = minPanX;
+            if (mapPanY > maxPanY) mapPanY = maxPanY;
+            if (mapPanY < minPanY) mapPanY = minPanY;
+
             const content = document.getElementById('map-content');
             content.style.transform = `translate(${mapPanX}px, ${mapPanY}px)`;
         }
