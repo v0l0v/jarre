@@ -1695,9 +1695,24 @@
                 if (y < minY) minY = y;
                 if (y > maxY) maxY = y;
                 
+                const normName = w.name.toLowerCase().replace(/ /g, '');
+                const folderName = normName;
+                const pAssets = planetAssetsMap[folderName];
+                let bgUrl = null;
+                
+                if (pAssets && pAssets.files) {
+                    const imgFiles = pAssets.files.filter(f => {
+                        const ext = f.toLowerCase();
+                        return ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.webp');
+                    });
+                    if (imgFiles.length > 0) {
+                        bgUrl = `${pAssets.folder}/${imgFiles[0]}`;
+                    }
+                }
+                
                 node.style.left = x + 'px';
                 node.style.top = y + 'px';
-                node.style.backgroundImage = w.texture_url ? `url(${w.texture_url})` : `url(${getPlanetBase64(w)})`;
+                node.style.backgroundImage = bgUrl ? `url(${bgUrl})` : `url(${getPlanetBase64(w)})`;
                 node.style.backgroundSize = 'cover';
                 node.style.borderColor = '#' + w.c1.toString(16).padStart(6, '0');
                 node.style.color = '#' + w.c1.toString(16).padStart(6, '0'); 
