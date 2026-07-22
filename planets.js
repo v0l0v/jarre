@@ -78,7 +78,7 @@ const worldPalettes = [
         "c2": 7823942,
         "c3": 3740569,
         "type": "neon",
-        "description": "Planeta generado por consola.",
+        "description": "Mechanical men from outer space, programmed to make astonishing instrumental music!",
         "hasTransmission": false
     }
 ];
