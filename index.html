@@ -1748,8 +1748,8 @@
                 // Calcular ángulo cumulativo mezclando estructura y caos orgánico
                 let theta = 0;
                 for (let j = 0; j < i; j++) {
-                    // Cada ciclo de 9 planetas cambiamos de fase
-                    if (Math.floor(j / 9) % 2 === 0) {
+                    // Cada ciclo de 3 planetas cambiamos de fase para que se note el desorden rápido
+                    if (Math.floor(j / 3) % 2 === 0) {
                         theta += 2.094395; // ~120 grados (La Y perfecta estructurada)
                     } else {
                         theta += 2.399963; // ~137.5 grados (Ángulo áureo de Fibonacci, orgánico)
