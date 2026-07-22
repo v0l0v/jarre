@@ -204,6 +204,13 @@
         @keyframes blink { 0%, 49%, 100% { opacity: 0.7; } 50%, 99% { opacity: 0.2; } }
         @keyframes spaceWarpOpen { 0% { transform: scale(0) translateZ(-1000px); box-shadow: 0 0 100px 50px rgba(255, 255, 255, 1); filter: contrast(3) brightness(5) hue-rotate(270deg); border-radius: 50%; opacity: 0; } 20% { transform: scale(0.05) translateZ(-500px) scaleX(20); box-shadow: 0 0 150px 80px rgba(0, 255, 255, 0.8); filter: contrast(2) brightness(3) hue-rotate(180deg) blur(2px); border-radius: 50%; opacity: 1; } 50% { transform: scale(1.1) translateZ(100px) scaleX(1); box-shadow: 0 0 80px 20px rgba(0, 238, 255, 0.5); filter: contrast(1.2) brightness(1.5) hue-rotate(90deg); border-radius: 50%; opacity: 1; } 100% { transform: scale(1) translateZ(0); box-shadow: 0 0 50px rgba(0, 238, 255, 0.2); filter: contrast(1) brightness(1) hue-rotate(0deg); border-radius: 50%; opacity: 1; } }
         @keyframes spaceWarpClose { 0% { transform: scale(1) translateZ(0); opacity: 1; border-radius: 50%; } 50% { transform: scale(1.2) translateZ(200px); box-shadow: 0 0 80px 40px rgba(255, 0, 100, 0.6); filter: hue-rotate(90deg) brightness(2); border-radius: 50%; opacity: 1; } 100% { transform: scale(0) translateZ(-1000px) scaleX(0.1); box-shadow: 0 0 0 0 transparent; filter: brightness(5) blur(20px); opacity: 0; border-radius: 50%; } }
+        
+        #aura-modal-content.is-music { border-radius: 15px; width: min(90vw, 900px); height: min(80vh, 700px); }
+        #aura-modal-content.is-music.portal-open { animation: spaceWarpOpenSquare 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        #aura-modal-content.is-music.portal-close { animation: spaceWarpCloseSquare 2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
+        
+        @keyframes spaceWarpOpenSquare { 0% { transform: scale(0) translateZ(-1000px); box-shadow: 0 0 100px 50px rgba(255, 255, 255, 1); filter: contrast(3) brightness(5) hue-rotate(270deg); opacity: 0; } 20% { transform: scale(0.05) translateZ(-500px) scaleX(20); box-shadow: 0 0 150px 80px rgba(0, 255, 255, 0.8); filter: contrast(2) brightness(3) hue-rotate(180deg) blur(2px); opacity: 1; } 50% { transform: scale(1.1) translateZ(100px) scaleX(1); box-shadow: 0 0 80px 20px rgba(0, 238, 255, 0.5); filter: contrast(1.2) brightness(1.5) hue-rotate(90deg); opacity: 1; } 100% { transform: scale(1) translateZ(0); box-shadow: 0 0 50px rgba(0, 238, 255, 0.2); filter: contrast(1) brightness(1) hue-rotate(0deg); opacity: 1; } }
+        @keyframes spaceWarpCloseSquare { 0% { transform: scale(1) translateZ(0); opacity: 1; } 50% { transform: scale(1.2) translateZ(200px); box-shadow: 0 0 80px 40px rgba(255, 0, 100, 0.6); filter: hue-rotate(90deg) brightness(2); opacity: 1; } 100% { transform: scale(0) translateZ(-1000px) scaleX(0.1); box-shadow: 0 0 0 0 transparent; filter: brightness(5) blur(20px); opacity: 0; } }
         @keyframes holoOpen { 0% { transform: scale3d(0, 0.01, 1); opacity: 0; filter: brightness(3); box-shadow: 0 0 100px 50px rgba(0, 255, 255, 1); border-radius: 15px; } 30% { transform: scale3d(0.5, 0.01, 1); opacity: 0.8; filter: brightness(2) contrast(1.5) sepia(1) hue-rotate(180deg); box-shadow: 0 0 50px 10px rgba(0, 255, 255, 0.8); border-radius: 15px; } 50% { transform: scale3d(1, 0.01, 1); opacity: 1; filter: brightness(2) contrast(1.5); box-shadow: 0 0 20px 5px rgba(0, 255, 255, 0.5); border-radius: 15px; } 75% { transform: scale3d(1, 1.05, 1); opacity: 1; filter: brightness(1.2); box-shadow: 0 0 80px 20px rgba(0, 255, 255, 0.4); border-radius: 15px; } 100% { transform: scale3d(1, 1, 1); opacity: 1; filter: brightness(1); box-shadow: 0 0 50px rgba(0, 238, 255, 0.2); border-radius: 15px; } }
         @keyframes holoClose { 0% { transform: scale3d(1, 1, 1); opacity: 1; filter: brightness(1); border-radius: 15px; } 25% { transform: scale3d(1, 1.05, 1); opacity: 1; filter: brightness(1.5); box-shadow: 0 0 80px 20px rgba(0, 255, 255, 0.4); border-radius: 15px; } 50% { transform: scale3d(1, 0.01, 1); opacity: 1; filter: brightness(2); box-shadow: 0 0 20px 5px rgba(0, 255, 255, 0.5); border-radius: 15px; } 70% { transform: scale3d(0.5, 0.01, 1); opacity: 0.5; filter: brightness(3); box-shadow: 0 0 50px 10px rgba(0, 255, 255, 0.8); border-radius: 15px; } 100% { transform: scale3d(0, 0.01, 1); opacity: 0; filter: brightness(4); box-shadow: 0 0 100px 50px rgba(0, 255, 255, 1); border-radius: 15px; } }
         #game-terminal { position: fixed; bottom: 0; left: 0; width: 100%; height: 33vh; background: rgba(0, 15, 0, 0.95); border-top: 2px solid #0f0; font-family: monospace; color: #0f0; z-index: 2000; display: none; flex-direction: column; padding: 10px; box-sizing: border-box; backdrop-filter: blur(5px); box-shadow: 0 -5px 20px rgba(0,255,0,0.2); }
@@ -328,13 +335,17 @@
                 if (iframe) {
                     iframe.src = url;
                     iframe.style.display = 'block';
-                    // Si no es musica.html, usamos formato documento cuadrado
+                    // Si no es musica.html, usamos formato documento cuadrado normal
                     if (!url.toLowerCase().includes('musica.html')) {
                         content.classList.add('is-document');
+                    } else {
+                        // Si es musica.html, usamos el nuevo formato cuadrado con la animacion circular
+                        content.classList.add('is-music');
                     }
                 }
             } else {
                 content.classList.remove('is-document');
+                content.classList.remove('is-music');
                 if (iframe) iframe.style.display = 'none';
                 if (player) {
                     player.style.display = 'block';
@@ -372,6 +383,8 @@
             
             const player = document.getElementById('aura-player');
             const iframe = document.getElementById('aura-iframe');
+            
+            // Note: The portal-close animation is handled by CSS for .is-music
 
             if (player && !player.paused && player.style.display !== 'none') {
                 if (fadeInterval) clearInterval(fadeInterval);
