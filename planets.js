@@ -1,6 +1,6 @@
 const worldPalettes = [
     {
-        "name": "NEON PRIME I",
+        "name": "NEON PRIME 0",
         "bg": 656661,
         "c1": 16711765,
         "c2": 61183,
@@ -10,7 +10,7 @@ const worldPalettes = [
         "hasTransmission": false
     },
     {
-        "name": "AURA II",
+        "name": "AURA 1",
         "bg": 1114129,
         "c1": 16711935,
         "c2": 11141375,
@@ -22,7 +22,7 @@ const worldPalettes = [
         "reg_url": "assets/video/auraii.mp4"
     },
     {
-        "name": "SOLARIS III",
+        "name": "SOLARIS 2",
         "bg": 1706496,
         "c1": 16746496,
         "c2": 16766720,
@@ -32,7 +32,7 @@ const worldPalettes = [
         "hasTransmission": false
     },
     {
-        "name": "TERRA NOVA IV",
+        "name": "TERRA NOVA 3",
         "bg": 4352,
         "c1": 65280,
         "c2": 17408,
@@ -42,7 +42,7 @@ const worldPalettes = [
         "hasTransmission": false
     },
     {
-        "name": "TOX V",
+        "name": "TOX 5",
         "bg": 4357,
         "c1": 65280,
         "c2": 35071,
@@ -59,7 +59,7 @@ const worldPalettes = [
         ]
     },
     {
-        "name": "GLACIER VI",
+        "name": "GLACIER 5",
         "bg": 1297,
         "c1": 65535,
         "c2": 16777215,
