@@ -70,5 +70,15 @@ const worldPalettes = [
         "c3": 3556942,
         "type": "ice",
         "description": "La estructura del universo al descubierto en una sola nota visual."
+    },
+    {
+        "name": "LES ROBOTS",
+        "bg": 658202,
+        "c1": 5192187,
+        "c2": 7823942,
+        "c3": 3740569,
+        "type": "neon",
+        "description": "Planeta generado por consola.",
+        "hasTransmission": false
     }
 ];
