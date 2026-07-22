@@ -990,7 +990,7 @@
             container.innerHTML = '';
             
             const normName = world.name.toLowerCase().replace(/ /g, '');
-            const folderName = normName === 'tox5' ? 'toxv' : normName; // mapeo para tox5
+            const folderName = normName;
             const pAssets = planetAssetsMap[folderName];
             
             let hasLinks = false;
@@ -1389,7 +1389,7 @@
             
             // Actualizar textura dinámica buscando en los archivos de la API primero
             const normName = w.name.toLowerCase().replace(/ /g, '');
-            const folderName = normName === 'tox5' ? 'toxv' : normName;
+            const folderName = normName;
             const pAssets = planetAssetsMap[folderName];
             
             let texFile = null;
