@@ -1022,6 +1022,10 @@
             const container = document.getElementById('aura-links');
             container.innerHTML = '';
             
+            if (typeof isAbsurdWarping !== 'undefined' && isAbsurdWarping) {
+                return;
+            }
+            
             const normName = world.name.toLowerCase().replace(/ /g, '');
             const folderName = normName;
             const pAssets = planetAssetsMap[folderName];
