@@ -1374,6 +1374,7 @@
         });
 
         let absurdWarpInterval;
+        let isAbsurdWarping = false;
         function randomAbsurdWarp() {
             initAudio();
             if (isWarpSpeed || isModalOpen) return;
@@ -1385,12 +1386,16 @@
             
             let changes = 0;
             const maxChanges = 15;
+            isAbsurdWarping = true;
             absurdWarpInterval = setInterval(() => {
                 let randIdx = Math.floor(Math.random() * worldPalettes.length);
-                changeWorld(randIdx, true); // Cambiar sin reiniciar warp
                 changes++;
                 if (changes >= maxChanges) {
                     clearInterval(absurdWarpInterval);
+                    isAbsurdWarping = false;
+                    changeWorld(randIdx, false); // El último salto hace el "viaje de retorno"
+                } else {
+                    changeWorld(randIdx, true); // Cambiar sin reiniciar warp
                 }
             }, 200);
         }
@@ -1416,8 +1421,15 @@
             
             scene.fog.color.setHex(w.bg);
             document.body.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
-            document.getElementById('world-title').innerText = w.name;
-            document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
+            
+            if (typeof isAbsurdWarping !== 'undefined' && isAbsurdWarping) {
+                document.getElementById('world-title').innerText = "";
+                document.getElementById('world-desc').innerText = "";
+            } else {
+                document.getElementById('world-title').innerText = w.name;
+                document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
+            }
+            
             renderLinks(w);
             
             // Actualizar textura dinámica buscando en los archivos de la API primero
