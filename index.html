@@ -32,6 +32,7 @@
             gap: 2rem;
             margin-top: 2rem;
             pointer-events: auto;
+            flex-wrap: wrap;
         }
         .aura-link {
             color: #fff;
@@ -1060,8 +1061,21 @@
                 // HTML Files (Conoce X)
                 const htmlFiles = files.filter(f => f.toLowerCase().endsWith('.html'));
                 htmlFiles.sort();
+                
+                // First add 'Conoce' (index.html)
+                const indexFile = htmlFiles.find(f => f.toLowerCase() === 'index.html');
+                if (indexFile) {
+                    hasLinks = true;
+                    const a = document.createElement('a');
+                    a.className = 'aura-link';
+                    a.href = '#';
+                    a.innerText = `CONOCE ${world.name}`.toUpperCase();
+                    a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${indexFile}`); };
+                    container.appendChild(a);
+                }
+
                 const musicFiles = htmlFiles.filter(f => f.toLowerCase().startsWith('musica'));
-                const otherHtmlFiles = htmlFiles.filter(f => !f.toLowerCase().startsWith('musica'));
+                const otherHtmlFiles = htmlFiles.filter(f => !f.toLowerCase().startsWith('musica') && f.toLowerCase() !== 'index.html');
 
                 if (musicFiles.length > 0) {
                     hasLinks = true;
@@ -1077,6 +1091,7 @@
                     subContainer.style.gap = '10px';
                     subContainer.style.marginTop = '10px';
                     subContainer.style.flexWrap = 'wrap';
+                    subContainer.style.width = '100%';
 
                     a.onclick = (e) => {
                         e.preventDefault();
@@ -1098,6 +1113,12 @@
                         subBtn.className = 'aura-link';
                         subBtn.style.fontSize = '0.8em';
                         subBtn.style.padding = '5px 10px';
+                        subBtn.style.border = '2px solid transparent';
+                        subBtn.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), linear-gradient(90deg, #ff0055, #00eeff)';
+                        subBtn.style.backgroundOrigin = 'border-box';
+                        subBtn.style.backgroundClip = 'padding-box, border-box';
+                        subBtn.style.color = '#fff';
+                        subBtn.style.boxShadow = '0 0 10px rgba(0, 238, 255, 0.2)';
                         subBtn.href = '#';
                         subBtn.innerText = name.toUpperCase();
                         subBtn.onclick = (e) => {
@@ -1113,11 +1134,7 @@
                     const a = document.createElement('a');
                     a.className = 'aura-link';
                     a.href = '#';
-                    if (hf.toLowerCase() === 'index.html') {
-                        a.innerText = `CONOCE ${world.name}`;
-                    } else {
-                        a.innerText = hf.replace(/\.html$/i, '').toUpperCase();
-                    }
+                    a.innerText = hf.replace(/\.html$/i, '').toUpperCase();
                     a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${hf}`); };
                     container.appendChild(a);
                 });
