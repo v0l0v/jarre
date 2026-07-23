@@ -215,7 +215,8 @@
         @keyframes spaceWarpCloseSquare { 0% { transform: scale(1) translateZ(0); opacity: 1; } 50% { transform: scale(1.2) translateZ(200px); box-shadow: 0 0 80px 40px rgba(255, 0, 100, 0.6); filter: hue-rotate(90deg) brightness(2); opacity: 1; } 100% { transform: scale(0) translateZ(-1000px) scaleX(0.1); box-shadow: 0 0 0 0 transparent; filter: brightness(5) blur(20px); opacity: 0; } }
         @keyframes holoOpen { 0% { transform: scale3d(0, 0.01, 1); opacity: 0; filter: brightness(3); box-shadow: 0 0 100px 50px rgba(0, 255, 255, 1); border-radius: 15px; } 30% { transform: scale3d(0.5, 0.01, 1); opacity: 0.8; filter: brightness(2) contrast(1.5) sepia(1) hue-rotate(180deg); box-shadow: 0 0 50px 10px rgba(0, 255, 255, 0.8); border-radius: 15px; } 50% { transform: scale3d(1, 0.01, 1); opacity: 1; filter: brightness(2) contrast(1.5); box-shadow: 0 0 20px 5px rgba(0, 255, 255, 0.5); border-radius: 15px; } 75% { transform: scale3d(1, 1.05, 1); opacity: 1; filter: brightness(1.2); box-shadow: 0 0 80px 20px rgba(0, 255, 255, 0.4); border-radius: 15px; } 100% { transform: scale3d(1, 1, 1); opacity: 1; filter: brightness(1); box-shadow: 0 0 50px rgba(0, 238, 255, 0.2); border-radius: 15px; } }
         @keyframes holoClose { 0% { transform: scale3d(1, 1, 1); opacity: 1; filter: brightness(1); border-radius: 15px; } 25% { transform: scale3d(1, 1.05, 1); opacity: 1; filter: brightness(1.5); box-shadow: 0 0 80px 20px rgba(0, 255, 255, 0.4); border-radius: 15px; } 50% { transform: scale3d(1, 0.01, 1); opacity: 1; filter: brightness(2); box-shadow: 0 0 20px 5px rgba(0, 255, 255, 0.5); border-radius: 15px; } 70% { transform: scale3d(0.5, 0.01, 1); opacity: 0.5; filter: brightness(3); box-shadow: 0 0 50px 10px rgba(0, 255, 255, 0.8); border-radius: 15px; } 100% { transform: scale3d(0, 0.01, 1); opacity: 0; filter: brightness(4); box-shadow: 0 0 100px 50px rgba(0, 255, 255, 1); border-radius: 15px; } }
-        #game-terminal { position: fixed; bottom: 0; left: 0; width: 100%; height: 33vh; background: rgba(0, 15, 0, 0.95); border-top: 2px solid #0f0; font-family: monospace; color: #0f0; z-index: 2000; display: none; flex-direction: column; padding: 10px; box-sizing: border-box; backdrop-filter: blur(5px); box-shadow: 0 -5px 20px rgba(0,255,0,0.2); }
+        #game-terminal { position: fixed; bottom: 0; left: 0; width: 100%; height: 33vh; background: rgba(0, 15, 0, 0.95); border-top: 2px solid #0f0; font-family: monospace; color: #0f0; z-index: 2000; display: flex; flex-direction: column; padding: 10px; box-sizing: border-box; backdrop-filter: blur(5px); box-shadow: 0 -5px 20px rgba(0,255,0,0.2); transform: translateY(100%); transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .terminal-open { transform: translateY(0) !important; }
         #close-terminal { position: absolute; top: 10px; right: 20px; background: transparent; color: #0f0; border: 1px solid #0f0; cursor: pointer; font-family: monospace; font-weight: bold; padding: 2px 8px; transition: all 0.2s; }
         #close-terminal:hover { background: #0f0; color: #000; }
         #terminal-output { flex: 1; overflow-y: auto; margin-bottom: 10px; font-size: 1rem; line-height: 1.5; text-shadow: 0 0 5px #0f0; }
@@ -249,6 +250,41 @@
         }
         .map-opening {
             animation: map-activate 0.6s cubic-bezier(0.1, 0.8, 0.2, 1) forwards !important;
+        }
+        #tv-noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            filter: grayscale(1) contrast(3) brightness(0.8);
+        }
+        .tv-noise-in {
+            animation: tv-static-fade-in 0.4s ease-in-out forwards, tv-static-move 0.1s steps(2) infinite;
+        }
+        .tv-noise-out {
+            animation: tv-static-fade-out 0.2s ease-in-out forwards, tv-static-move 0.1s steps(2) infinite;
+        }
+        @keyframes tv-static-fade-in {
+            0% { opacity: 0; }
+            10% { opacity: 0.85; }
+            80% { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
+        @keyframes tv-static-fade-out {
+            0% { opacity: 0; }
+            30% { opacity: 0.85; }
+            70% { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
+        @keyframes tv-static-move {
+            0% { background-position: 0 0; }
+            50% { background-position: 120px 240px; }
+            100% { background-position: -80px -150px; }
         }
         #close-map { position: absolute; top: 20px; right: 20px; background: transparent; color: #0ef; border: 1px solid #0ef; padding: 5px 15px; cursor: pointer; font-family: 'Outfit', sans-serif; font-size: 1.2rem; z-index: 3010; border-radius: 20px; transition: all 0.3s; }
         #close-map:hover { background: #0ef; color: #000; box-shadow: 0 0 15px #0ef; }
@@ -426,6 +462,7 @@
     <script src="planets.js"></script>
 </head>
 <body>
+    <div id="tv-noise"></div>
     <div id="game-map">
         <button id="close-map" onclick="closeMap()">X</button>
         <div id="map-header">
@@ -671,7 +708,7 @@
         let currentEditFieldIndex = 0;
 
         function openTerminal() {
-            document.getElementById('game-terminal').style.display = 'flex';
+            document.getElementById('game-terminal').classList.add('terminal-open');
             const input = document.getElementById('terminal-input');
             input.value = '';
             input.focus();
@@ -684,7 +721,7 @@
         }
 
         document.getElementById('close-terminal').addEventListener('click', () => {
-            document.getElementById('game-terminal').style.display = 'none';
+            document.getElementById('game-terminal').classList.remove('terminal-open');
         });
 
         document.getElementById('terminal-input').addEventListener('keydown', (e) => {
@@ -810,7 +847,7 @@
                     out.innerHTML += `<div>  set-desc [id] [nueva_descripción...] - Modifica la descripción de un planeta</div>`;
                     out.innerHTML += `<div>  set-type [id] [tipo]                 - Cambia el ecosistema (neon, fire, toxic, ice, terra, aura)</div>`;
                 } else if (val === 'exit' || val === 'salir') {
-                    document.getElementById('game-terminal').style.display = 'none';
+                    document.getElementById('game-terminal').classList.remove('terminal-open');
                 } else if (val.startsWith('cat ') || val.startsWith('view ') || val.startsWith('ver ')) {
                     const id = parseInt(val.split(' ')[1]);
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
@@ -945,7 +982,7 @@
                     if (!isNaN(id) && id >= 0 && id < worldPalettes.length) {
                         out.innerHTML += `<div>Iniciando salto a ${worldPalettes[id].name}...</div>`;
                         setTimeout(() => {
-                            document.getElementById('game-terminal').style.display = 'none';
+                            document.getElementById('game-terminal').classList.remove('terminal-open');
                             changeWorld(id);
                         }, 500);
                     } else {
@@ -985,8 +1022,14 @@
             }
             
             const term = document.getElementById('game-terminal');
-            if (term.style.display === 'flex') {
-                if (event.key === 'Escape') term.style.display = 'none';
+            if (term.classList.contains('terminal-open')) {
+                if (event.key === 'Escape') term.classList.remove('terminal-open');
+                return;
+            }
+            
+            const map = document.getElementById('game-map');
+            if (map && map.style.display === 'flex') {
+                if (event.key === 'Escape') closeMap();
                 return;
             }
 
@@ -1061,7 +1104,9 @@
                 // HTML Files (Conoce X)
                 const htmlFiles = files.filter(f => f.toLowerCase().endsWith('.html'));
                 htmlFiles.sort();
-                
+                let musicMenuBtn = null;
+                let musicSubContainer = null;
+
                 // First add 'Conoce' (index.html)
                 const indexFile = htmlFiles.find(f => f.toLowerCase() === 'index.html');
                 if (indexFile) {
@@ -1070,7 +1115,18 @@
                     a.className = 'aura-link';
                     a.href = '#';
                     a.innerText = `CONOCE ${world.name}`.toUpperCase();
-                    a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${indexFile}`); };
+                    a.onclick = (e) => { 
+                        e.preventDefault();
+                        if (musicMenuBtn && musicSubContainer) {
+                            musicSubContainer.style.display = 'none';
+                            musicMenuBtn.style.background = '';
+                            musicMenuBtn.style.borderColor = '';
+                            musicMenuBtn.style.boxShadow = '';
+                            musicMenuBtn.style.color = '';
+                            musicMenuBtn.style.transform = '';
+                        }
+                        openAuraModal(`${folder}/${indexFile}`); 
+                    };
                     container.appendChild(a);
                 }
 
@@ -1093,9 +1149,26 @@
                     subContainer.style.flexWrap = 'wrap';
                     subContainer.style.width = '100%';
 
+                    musicMenuBtn = a;
+                    musicSubContainer = subContainer;
+
                     a.onclick = (e) => {
                         e.preventDefault();
-                        subContainer.style.display = subContainer.style.display === 'none' ? 'flex' : 'none';
+                        const isClosed = subContainer.style.display === 'none';
+                        subContainer.style.display = isClosed ? 'flex' : 'none';
+                        if (isClosed) {
+                            a.style.background = 'rgba(0, 238, 255, 0.1)';
+                            a.style.borderColor = '#00eeff';
+                            a.style.boxShadow = 'inset 0 0 10px rgba(0, 238, 255, 0.4), 0 0 10px rgba(0, 238, 255, 0.2)';
+                            a.style.color = '#00eeff';
+                            a.style.transform = 'scale(0.96)';
+                        } else {
+                            a.style.background = '';
+                            a.style.borderColor = '';
+                            a.style.boxShadow = '';
+                            a.style.color = '';
+                            a.style.transform = '';
+                        }
                     };
 
                     container.appendChild(a);
@@ -1135,7 +1208,18 @@
                     a.className = 'aura-link';
                     a.href = '#';
                     a.innerText = hf.replace(/\.html$/i, '').toUpperCase();
-                    a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${hf}`); };
+                    a.onclick = (e) => { 
+                        e.preventDefault(); 
+                        if (musicMenuBtn && musicSubContainer) {
+                            musicSubContainer.style.display = 'none';
+                            musicMenuBtn.style.background = '';
+                            musicMenuBtn.style.borderColor = '';
+                            musicMenuBtn.style.boxShadow = '';
+                            musicMenuBtn.style.color = '';
+                            musicMenuBtn.style.transform = '';
+                        }
+                        openAuraModal(`${folder}/${hf}`); 
+                    };
                     container.appendChild(a);
                 });
                 
@@ -1151,7 +1235,18 @@
                     const playIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
                     a.innerHTML = videos.length > 1 ? `${playIcon} ${i + 1}` : `${playIcon}`;
                     
-                    a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${vid}`); };
+                    a.onclick = (e) => { 
+                        e.preventDefault(); 
+                        if (musicMenuBtn && musicSubContainer) {
+                            musicSubContainer.style.display = 'none';
+                            musicMenuBtn.style.background = '';
+                            musicMenuBtn.style.borderColor = '';
+                            musicMenuBtn.style.boxShadow = '';
+                            musicMenuBtn.style.color = '';
+                            musicMenuBtn.style.transform = '';
+                        }
+                        openAuraModal(`${folder}/${vid}`); 
+                    };
                     container.appendChild(a);
                 });
             } else {
@@ -1879,7 +1974,17 @@
             mapBounds = { minX, maxX, minY, maxY };
         }
 
+        function triggerTVNoise(typeClass) {
+            const noise = document.getElementById('tv-noise');
+            if (noise) {
+                noise.classList.remove('tv-noise-in', 'tv-noise-out');
+                void noise.offsetWidth; // Reflow
+                noise.classList.add(typeClass);
+            }
+        }
+
         function openMap() {
+            triggerTVNoise('tv-noise-in');
             const gameMap = document.getElementById('game-map');
             gameMap.style.display = 'flex';
             
@@ -1901,6 +2006,7 @@
         }
 
         function closeMap(jumping = false) {
+            triggerTVNoise('tv-noise-out');
             document.getElementById('game-map').style.display = 'none';
             const inCrossroads = alternativePortals.some(p => p.mesh.visible);
             if (!jumping && !isWarpSpeed && !inCrossroads) {
