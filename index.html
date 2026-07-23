@@ -1073,7 +1073,7 @@
         let currentWorld = Math.floor(Math.random() * worldPalettes.length);
         let planetAssetsMap = {};
         
-        fetch('/api/all_planet_assets')
+        fetch('/api/all_planet_assets?t=' + new Date().getTime())
             .then(res => {
                 if (!res.ok) throw new Error('API not available, fallback to static JSON');
                 return res.json();
