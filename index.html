@@ -1052,17 +1052,62 @@
                 // HTML Files (Conoce X)
                 const htmlFiles = files.filter(f => f.toLowerCase().endsWith('.html'));
                 htmlFiles.sort();
-                htmlFiles.forEach((hf) => {
+                const musicFiles = htmlFiles.filter(f => f.toLowerCase().startsWith('musica'));
+                const otherHtmlFiles = htmlFiles.filter(f => !f.toLowerCase().startsWith('musica'));
+
+                if (musicFiles.length > 0) {
+                    hasLinks = true;
+                    const a = document.createElement('a');
+                    a.className = 'aura-link';
+                    a.href = '#';
+                    a.innerText = 'EMISIÓN MUSICAL';
+                    
+                    const subContainer = document.createElement('div');
+                    subContainer.style.display = 'none';
+                    subContainer.style.flexDirection = 'row';
+                    subContainer.style.justifyContent = 'center';
+                    subContainer.style.gap = '10px';
+                    subContainer.style.marginTop = '10px';
+                    subContainer.style.flexWrap = 'wrap';
+
+                    a.onclick = (e) => {
+                        e.preventDefault();
+                        subContainer.style.display = subContainer.style.display === 'none' ? 'flex' : 'none';
+                    };
+
+                    container.appendChild(a);
+                    container.appendChild(subContainer);
+
+                    musicFiles.forEach(hf => {
+                        let name = hf.replace(/\.html$/i, '');
+                        if (name.toLowerCase().startsWith('musica - ')) {
+                            name = name.substring(9);
+                        } else if (name.toLowerCase() === 'musica') {
+                            name = 'Emisión Principal';
+                        }
+                        
+                        const subBtn = document.createElement('a');
+                        subBtn.className = 'aura-link';
+                        subBtn.style.fontSize = '0.8em';
+                        subBtn.style.padding = '5px 10px';
+                        subBtn.href = '#';
+                        subBtn.innerText = name.toUpperCase();
+                        subBtn.onclick = (e) => {
+                            e.preventDefault();
+                            openAuraModal(`${folder}/${hf}`);
+                        };
+                        subContainer.appendChild(subBtn);
+                    });
+                }
+
+                otherHtmlFiles.forEach((hf) => {
                     hasLinks = true;
                     const a = document.createElement('a');
                     a.className = 'aura-link';
                     a.href = '#';
                     if (hf.toLowerCase() === 'index.html') {
                         a.innerText = `CONOCE ${world.name}`;
-                    } else if (hf.toLowerCase() === 'musica.html') {
-                        a.innerText = 'EMISIÓN MUSICAL';
                     } else {
-                        // Quitar la extensión .html para que el botón quede más limpio
                         a.innerText = hf.replace(/\.html$/i, '').toUpperCase();
                     }
                     a.onclick = (e) => { e.preventDefault(); openAuraModal(`${folder}/${hf}`); };
