@@ -33,6 +33,11 @@
             margin-top: 2rem;
             pointer-events: auto;
             flex-wrap: wrap;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90vw;
         }
         .aura-link {
             color: #fff;
@@ -1106,6 +1111,27 @@
                 htmlFiles.sort();
                 let musicMenuBtn = null;
                 let musicSubContainer = null;
+                let videoMenuBtn = null;
+                let videoSubContainer = null;
+
+                function closeAllSubmenus() {
+                    if (musicMenuBtn && musicSubContainer) {
+                        musicSubContainer.style.display = 'none';
+                        musicMenuBtn.style.background = '';
+                        musicMenuBtn.style.borderColor = '';
+                        musicMenuBtn.style.boxShadow = '';
+                        musicMenuBtn.style.color = '';
+                        musicMenuBtn.style.transform = '';
+                    }
+                    if (videoMenuBtn && videoSubContainer) {
+                        videoSubContainer.style.display = 'none';
+                        videoMenuBtn.style.background = '';
+                        videoMenuBtn.style.borderColor = '';
+                        videoMenuBtn.style.boxShadow = '';
+                        videoMenuBtn.style.color = '';
+                        videoMenuBtn.style.transform = '';
+                    }
+                }
 
                 // First add 'Conoce' (index.html)
                 const indexFile = htmlFiles.find(f => f.toLowerCase() === 'index.html');
@@ -1117,14 +1143,7 @@
                     a.innerText = `CONOCE ${world.name}`.toUpperCase();
                     a.onclick = (e) => { 
                         e.preventDefault();
-                        if (musicMenuBtn && musicSubContainer) {
-                            musicSubContainer.style.display = 'none';
-                            musicMenuBtn.style.background = '';
-                            musicMenuBtn.style.borderColor = '';
-                            musicMenuBtn.style.boxShadow = '';
-                            musicMenuBtn.style.color = '';
-                            musicMenuBtn.style.transform = '';
-                        }
+                        closeAllSubmenus();
                         openAuraModal(`${folder}/${indexFile}`); 
                     };
                     container.appendChild(a);
@@ -1138,7 +1157,7 @@
                     const a = document.createElement('a');
                     a.className = 'aura-link';
                     a.href = '#';
-                    a.innerText = 'EMISIÓN MUSICAL';
+                    a.innerText = 'SEÑAL DE AUDIO';
                     
                     const subContainer = document.createElement('div');
                     subContainer.style.display = 'none';
@@ -1155,8 +1174,9 @@
                     a.onclick = (e) => {
                         e.preventDefault();
                         const isClosed = subContainer.style.display === 'none';
-                        subContainer.style.display = isClosed ? 'flex' : 'none';
+                        closeAllSubmenus();
                         if (isClosed) {
+                            subContainer.style.display = 'flex';
                             a.style.background = 'rgba(0, 238, 255, 0.1)';
                             a.style.borderColor = '#00eeff';
                             a.style.boxShadow = 'inset 0 0 10px rgba(0, 238, 255, 0.4), 0 0 10px rgba(0, 238, 255, 0.2)';
@@ -1179,7 +1199,7 @@
                         if (name.toLowerCase().startsWith('musica - ')) {
                             name = name.substring(9);
                         } else if (name.toLowerCase() === 'musica') {
-                            name = 'Emisión Principal';
+                            name = 'Señal Principal';
                         }
                         
                         const subBtn = document.createElement('a');
@@ -1210,14 +1230,7 @@
                     a.innerText = hf.replace(/\.html$/i, '').toUpperCase();
                     a.onclick = (e) => { 
                         e.preventDefault(); 
-                        if (musicMenuBtn && musicSubContainer) {
-                            musicSubContainer.style.display = 'none';
-                            musicMenuBtn.style.background = '';
-                            musicMenuBtn.style.borderColor = '';
-                            musicMenuBtn.style.boxShadow = '';
-                            musicMenuBtn.style.color = '';
-                            musicMenuBtn.style.transform = '';
-                        }
+                        closeAllSubmenus();
                         openAuraModal(`${folder}/${hf}`); 
                     };
                     container.appendChild(a);
@@ -1226,29 +1239,64 @@
                 // Videos (Transmisión)
                 const videos = files.filter(f => f.toLowerCase().endsWith('.mp4') || f.toLowerCase().endsWith('.webm'));
                 videos.sort();
-                videos.forEach((vid, i) => {
+                if (videos.length > 0) {
                     hasLinks = true;
                     const a = document.createElement('a');
                     a.className = 'aura-link';
                     a.href = '#';
-                    
                     const playIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
-                    a.innerHTML = videos.length > 1 ? `${playIcon} ${i + 1}` : `${playIcon}`;
+                    a.innerHTML = `${playIcon} SEÑAL DE VÍDEO`;
                     
-                    a.onclick = (e) => { 
-                        e.preventDefault(); 
-                        if (musicMenuBtn && musicSubContainer) {
-                            musicSubContainer.style.display = 'none';
-                            musicMenuBtn.style.background = '';
-                            musicMenuBtn.style.borderColor = '';
-                            musicMenuBtn.style.boxShadow = '';
-                            musicMenuBtn.style.color = '';
-                            musicMenuBtn.style.transform = '';
+                    const subContainer = document.createElement('div');
+                    subContainer.style.display = 'none';
+                    subContainer.style.flexDirection = 'row';
+                    subContainer.style.justifyContent = 'center';
+                    subContainer.style.gap = '10px';
+                    subContainer.style.marginTop = '10px';
+                    subContainer.style.flexWrap = 'wrap';
+                    subContainer.style.width = '100%';
+
+                    videoMenuBtn = a;
+                    videoSubContainer = subContainer;
+
+                    a.onclick = (e) => {
+                        e.preventDefault();
+                        const isClosed = subContainer.style.display === 'none';
+                        closeAllSubmenus();
+                        if (isClosed) {
+                            subContainer.style.display = 'flex';
+                            a.style.background = 'rgba(0, 238, 255, 0.1)';
+                            a.style.borderColor = '#00eeff';
+                            a.style.boxShadow = 'inset 0 0 10px rgba(0, 238, 255, 0.4), 0 0 10px rgba(0, 238, 255, 0.2)';
+                            a.style.color = '#00eeff';
+                            a.style.transform = 'scale(0.96)';
                         }
-                        openAuraModal(`${folder}/${vid}`); 
                     };
+
                     container.appendChild(a);
-                });
+                    container.appendChild(subContainer);
+
+                    videos.forEach((vid, i) => {
+                        const subBtn = document.createElement('a');
+                        subBtn.className = 'aura-link';
+                        subBtn.style.fontSize = '0.8em';
+                        subBtn.style.padding = '5px 10px';
+                        subBtn.style.border = '2px solid transparent';
+                        subBtn.style.backgroundImage = 'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), linear-gradient(90deg, #ff0055, #00eeff)';
+                        subBtn.style.backgroundOrigin = 'border-box';
+                        subBtn.style.backgroundClip = 'padding-box, border-box';
+                        subBtn.style.color = '#fff';
+                        subBtn.style.boxShadow = '0 0 10px rgba(0, 238, 255, 0.2)';
+                        subBtn.href = '#';
+                        subBtn.innerHTML = videos.length > 1 ? `${playIcon} SEÑAL ${i + 1}` : `${playIcon} SEÑAL ÚNICA`;
+                        
+                        subBtn.onclick = (e) => {
+                            e.preventDefault();
+                            openAuraModal(`${folder}/${vid}`);
+                        };
+                        subContainer.appendChild(subBtn);
+                    });
+                }
             } else {
                 // Fallback estático (si no hay API o si la carpeta no existe)
                 if (world.trans_url) {
@@ -1257,7 +1305,7 @@
                     a.className = 'aura-link';
                     a.href = '#';
                     const playIcon = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px; margin-bottom: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
-                    a.innerHTML = `${playIcon}`;
+                    a.innerHTML = `${playIcon} SEÑAL DE VÍDEO`;
                     a.onclick = (e) => { e.preventDefault(); openAuraModal(world.trans_url); };
                     container.appendChild(a);
                 }
