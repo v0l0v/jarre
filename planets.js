@@ -80,5 +80,15 @@ const worldPalettes = [
         "type": "neon",
         "description": "Mechanical men from outer space, programmed to make astonishing instrumental music!",
         "hasTransmission": false
+    },
+    {
+        "name": "AZKENA RF",
+        "bg": 14579115,
+        "c1": 134619,
+        "c2": 12122262,
+        "c3": 13737449,
+        "type": "ice",
+        "description": "Azkena Rock Festival enciende los amplis de nuevo y sube el volumen al máximo.",
+        "hasTransmission": false
     }
 ];
