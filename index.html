@@ -1338,12 +1338,24 @@
             container.style.display = hasLinks ? 'flex' : 'none';
         }
 
+        function getDarkenedHex(hex, factor = 0.15) {
+            let r = (hex >> 16) & 255;
+            let g = (hex >> 8) & 255;
+            let b = hex & 255;
+            r = Math.floor(r * factor);
+            g = Math.floor(g * factor);
+            b = Math.floor(b * factor);
+            return (r << 16) | (g << 8) | b;
+        }
+
         const initW = worldPalettes[currentWorld];
         document.getElementById('world-title').innerText = initW.name;
         document.getElementById('world-desc').innerText = initW.description || "LABORATORIO VISUAL";
         renderLinks(initW);
-        document.body.style.backgroundColor = '#' + initW.bg.toString(16).padStart(6, '0');
-        scene.fog.color.setHex(initW.bg);
+        
+        const darkInitBg = getDarkenedHex(initW.bg, 0.15);
+        document.body.style.backgroundColor = '#' + darkInitBg.toString(16).padStart(6, '0');
+        scene.fog.color.setHex(darkInitBg);
 
         // Mapa de navegación (grafo topológico personalizado)
         const navMap = {};
@@ -1664,8 +1676,9 @@
             const w = worldPalettes[currentWorld];
             updateAudioForWorld(w);
             
-            scene.fog.color.setHex(w.bg);
-            document.body.style.backgroundColor = '#' + w.bg.toString(16).padStart(6, '0');
+            const darkBg = getDarkenedHex(w.bg, 0.15);
+            scene.fog.color.setHex(darkBg);
+            document.body.style.backgroundColor = '#' + darkBg.toString(16).padStart(6, '0');
             document.getElementById('world-title').innerText = w.name;
             document.getElementById('world-desc').innerText = w.description || "LABORATORIO VISUAL";
             renderLinks(w);
