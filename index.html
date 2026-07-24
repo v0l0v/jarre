@@ -1382,6 +1382,7 @@
             c2: 0xff00ff,
             c3: 0xffff00,
             type: "neon",
+            secret: true,
             trans_url: "",
             reg_url: ""
         });
@@ -1601,6 +1602,7 @@
 
         // Anomalía (Easter Egg)
         let anomalyActive = false;
+        let omegaDiscovered = false;
         const anomalyGeo = new THREE.CapsuleGeometry(15, 30, 16, 16); 
         const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 });
         const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
@@ -1943,6 +1945,7 @@
                         // Hover sobre anomalía = salto instantáneo
                         anomalyActive = false;
                         anomalyMesh.visible = false;
+                        omegaDiscovered = true;
                         document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
                         planetInfo.style.opacity = '0';
                         isWarpSpeed = true;
@@ -2088,6 +2091,8 @@
             let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
             
             worldPalettes.forEach((w, i) => {
+                if (w.secret && !omegaDiscovered) return;
+                
                 const node = document.createElement('div');
                 node.className = 'map-node';
                 
