@@ -1965,6 +1965,13 @@
                 camera.position.x += playerVel.x * delta;
                 camera.position.z += playerVel.z * delta;
                 
+                // Límites del mundo (rebote simpático)
+                const limit = 3800;
+                if (camera.position.x > limit) { camera.position.x = limit; playerVel.x *= -1.5; }
+                if (camera.position.x < -limit) { camera.position.x = -limit; playerVel.x *= -1.5; }
+                if (camera.position.z > limit) { camera.position.z = limit; playerVel.z *= -1.5; }
+                if (camera.position.z < -limit) { camera.position.z = -limit; playerVel.z *= -1.5; }
+                
                 // Mantener la cámara elevada (vista dron)
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
                 if (moveSpeed > 5) {
