@@ -577,7 +577,7 @@
         // Controles de aterrizaje
         let isLanded = false;
         let droneThrust = 0;
-        let droneAltitude = 3000;
+        let droneAltitude = 2500;
         const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
         let playerVel = { x: 0, z: 0 };
         const surfaceGroup = new THREE.Group();
@@ -1982,7 +1982,7 @@
                 
                 // Control de altitud (Zoom In / Zoom Out)
                 if (keys.up) droneAltitude = Math.max(droneAltitude - delta * 2000, 150); // Acercarse (bajar altura)
-                if (keys.down) droneAltitude = Math.min(droneAltitude + delta * 2000, 8000); // Alejarse (subir altura)
+                if (keys.down) droneAltitude = Math.min(droneAltitude + delta * 2000, 3500); // Alejarse (subir altura)
                 
                 // Mantener la cámara elevada (vista dron más alta, oscilación)
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
