@@ -632,6 +632,7 @@
             let distances = [];
             for (let i = 0; i < worldPalettes.length; i++) {
                 if (i === currentWorld) continue;
+                if (worldPalettes[i].secret) continue; // Excluir Sector Omega de los saltos convencionales
                 const c = getPlanetCoords(worldPalettes[i]);
                 const dist = Math.sqrt(Math.pow(c.x - currCoords.x, 2) + Math.pow(c.y - currCoords.y, 2) + Math.pow(c.z - currCoords.z, 2));
                 distances.push({ idx: i, dist: dist, coords: c });
