@@ -1603,13 +1603,19 @@
         // Anomalía (Easter Egg)
         let anomalyActive = false;
         let omegaDiscovered = false;
-        const anomalyGeo = new THREE.CylinderGeometry(15, 15, 40, 16); 
+        const anomalyGeo = new THREE.SphereGeometry(8, 16, 16); 
         const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 });
         const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
         
         const anomalyLight = new THREE.PointLight(0x00ffff, 0, 500);
         anomalyMesh.add(anomalyLight);
         
+        // Área invisible más grande para facilitar el hover
+        const hitBoxGeo = new THREE.SphereGeometry(40, 8, 8);
+        const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
+        const hitBoxMesh = new THREE.Mesh(hitBoxGeo, hitBoxMat);
+        anomalyMesh.add(hitBoxMesh);
+
         anomalyMesh.visible = false;
         scene.add(anomalyMesh);
         
@@ -1617,14 +1623,14 @@
             anomalyActive = true;
             anomalyMesh.visible = true;
             anomalyMesh.position.set(
-                (Math.random() - 0.5) * 800,
-                (Math.random() - 0.5) * 600,
-                cameraBaseZ - (400 + Math.random() * 400)
+                (Math.random() - 0.5) * 500, // Spawn más centrado
+                (Math.random() - 0.5) * 400,
+                cameraBaseZ - (400 + Math.random() * 200)
             );
             anomalyMesh.userData.velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 2, 
-                (Math.random() - 0.5) * 2,
-                (Math.random() - 0.5) * 2
+                (Math.random() - 0.5) * 0.5, // Muy poco movimiento lateral
+                (Math.random() - 0.5) * 0.5,
+                (Math.random() * 1) + 1.0 // Viene directo hacia ti
             );
             anomalyMesh.userData.maxLifespan = 180 + Math.random() * 180; // 3 a 6 segundos a 60fps
             anomalyMesh.userData.lifespan = anomalyMesh.userData.maxLifespan;
@@ -1936,10 +1942,12 @@
                 mouseVector.x = normMouseX;
                 mouseVector.y = normMouseY;
                 raycaster.setFromCamera(mouseVector, camera);
-                const intersects = raycaster.intersectObjects(visibleMeshes);
+                const intersects = raycaster.intersectObjects(visibleMeshes, true);
                 if (intersects.length > 0) {
                     document.body.style.cursor = 'pointer';
-                    const clickedMesh = intersects[0].object;
+                    // Si choca con el hitbox o la anomalía, referenciamos al padre (la anomalía en sí)
+                    let clickedMesh = intersects[0].object;
+                    if (clickedMesh.parent === anomalyMesh) clickedMesh = anomalyMesh;
                     
                     if (clickedMesh === anomalyMesh) {
                         // Hover sobre anomalía = salto instantáneo
