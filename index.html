@@ -1773,6 +1773,51 @@
             generateParticles();
         }
 
+        // --- OMEGA WARP ENGINE ---
+        const omegaWarpGroup = new THREE.Group();
+        scene.add(omegaWarpGroup);
+        const warpGeoTorus = new THREE.TorusGeometry(300, 5, 16, 100);
+        const warpGeoSphere = new THREE.SphereGeometry(150, 32, 32);
+        const warpGeoCylinder = new THREE.CylinderGeometry(2, 2, 800, 8);
+        const warpColors = [0xff00ff, 0x00ffff, 0xffaa00, 0xff0000, 0x00ff00, 0x0000ff, 0xffffff];
+        let warpActiveMeshes = [];
+
+        function spawnWarpObject() {
+            let mesh;
+            let type = Math.random();
+            if (type < 0.2) {
+                const mat = new THREE.MeshBasicMaterial({ color: warpColors[Math.floor(Math.random()*warpColors.length)], wireframe: true, transparent: true, opacity: 0.8 });
+                mesh = new THREE.Mesh(warpGeoTorus, mat);
+                mesh.userData = { speed: 8000, type: 'ring', rot: Math.random() * 0.1 };
+            } else if (type < 0.4) {
+                const mat = new THREE.MeshBasicMaterial({ color: warpColors[Math.floor(Math.random()*warpColors.length)] });
+                mesh = new THREE.Mesh(warpGeoSphere, mat);
+                mesh.userData = { speed: 5000, type: 'planet' };
+            } else if (type < 0.7) {
+                const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
+                mesh = new THREE.Mesh(warpGeoCylinder, mat);
+                mesh.rotation.x = Math.PI / 2;
+                mesh.userData = { speed: 20000, type: 'star' };
+            } else {
+                const mat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                mesh = new THREE.Mesh(warpGeoSphere, mat);
+                const corona = new THREE.Mesh(new THREE.TorusGeometry(160, 5, 16, 64), new THREE.MeshBasicMaterial({ color: warpColors[Math.floor(Math.random()*warpColors.length)], transparent: true, opacity: 0.8 }));
+                mesh.add(corona);
+                mesh.userData = { speed: 6000, type: 'eclipse' };
+            }
+            
+            const spreadX = (Math.random() - 0.5) * 3000;
+            const spreadY = (Math.random() - 0.5) * 3000;
+            mesh.position.set(camera.position.x + spreadX, camera.position.y + spreadY, camera.position.z - 8000);
+            
+            if (mesh.userData.type === 'ring') {
+                mesh.position.x = camera.position.x + (Math.random() - 0.5) * 500;
+                mesh.position.y = camera.position.y + (Math.random() - 0.5) * 500;
+            }
+            omegaWarpGroup.add(mesh);
+            warpActiveMeshes.push(mesh);
+        }
+
         // Bucle de animación (60fps)
         const clock = new THREE.Clock();
         let accumulatedTime = 0;
@@ -1791,11 +1836,23 @@
                 targetSpeed = 40;
                 warpTimer -= delta;
                 
-                // Lógica del flash cósmico
                 if (pendingWorldIndex === SECRET_INDEX) {
                     const cosmicFlash = document.getElementById('cosmic-flash');
                     if (warpTimer <= 2.0 && warpTimer > 0) {
                         cosmicFlash.style.opacity = '1';
+                    }
+                    
+                    // Omega Warp Visuals
+                    if (Math.random() < 0.4) spawnWarpObject();
+                    for (let i = warpActiveMeshes.length - 1; i >= 0; i--) {
+                        const mesh = warpActiveMeshes[i];
+                        mesh.position.z += mesh.userData.speed * delta;
+                        if (mesh.userData.type === 'ring') mesh.rotation.z += mesh.userData.rot;
+                        if (mesh.userData.type === 'planet' || mesh.userData.type === 'eclipse') mesh.rotation.y += delta;
+                        if (mesh.position.z > camera.position.z + 1000) {
+                            omegaWarpGroup.remove(mesh);
+                            warpActiveMeshes.splice(i, 1);
+                        }
                     }
                 }
                 
