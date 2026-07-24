@@ -1604,10 +1604,11 @@
         // Estrella Omega (fija en el fondo)
         let omegaDiscovered = false;
         const omegaStarGroup = new THREE.Group();
-        omegaStarGroup.position.set(-600, 350, -2500); // Fija al fondo del espacio
+        // La acercamos un poco (z = -1200) para que la niebla negra no la oculte
+        omegaStarGroup.position.set(200, 150, -1200); 
 
-        // Núcleo de la estrella (pequeño y brillante)
-        const starGeo = new THREE.SphereGeometry(6, 16, 16);
+        // Núcleo de la estrella (más grande para que se vea sin hitbox extra)
+        const starGeo = new THREE.SphereGeometry(15, 16, 16);
         const starMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
         const starMesh = new THREE.Mesh(starGeo, starMat);
         omegaStarGroup.add(starMesh);
@@ -1622,16 +1623,10 @@
             const ringGeo = new THREE.RingGeometry(0.1, 1, 32);
             const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
             const ring = new THREE.Mesh(ringGeo, ringMat);
-            ring.userData = { phase: i * (Math.PI * 2 / 3) }; // Desfasaje entre los 3 anillos
+            ring.userData = { phase: i * (Math.PI * 2 / 3) }; 
             omegaStarGroup.add(ring);
             rings.push(ring);
         }
-
-        // Hitbox grande invisible para facilitar el clic/hover
-        const hitBoxGeo = new THREE.SphereGeometry(80, 8, 8);
-        const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
-        const hitBoxMesh = new THREE.Mesh(hitBoxGeo, hitBoxMat);
-        omegaStarGroup.add(hitBoxMesh);
 
         scene.add(omegaStarGroup);
 
