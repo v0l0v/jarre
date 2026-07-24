@@ -614,11 +614,19 @@
                 }
                 geo.computeVertexNormals();
                 
+                let groundTex = null;
+                if (coreMat.map) {
+                    groundTex = coreMat.map.clone();
+                    groundTex.wrapS = THREE.RepeatWrapping;
+                    groundTex.wrapT = THREE.RepeatWrapping;
+                    groundTex.repeat.set(8, 8);
+                    groundTex.needsUpdate = true;
+                }
+                
                 const mat = new THREE.MeshBasicMaterial({ 
-                    color: w.c2, 
-                    wireframe: true, 
-                    transparent: true, 
-                    opacity: 0.6 
+                    map: groundTex,
+                    color: groundTex ? 0xffffff : w.c2,
+                    wireframe: !groundTex
                 });
                 
                 surfacePlane = new THREE.Mesh(geo, mat);
