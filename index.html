@@ -1662,7 +1662,7 @@
                     }
                 }
             } else if (w.type === 'ice') {
-                const grad = ctx.createLinearGradient(0, 0, 512, 512);
+                const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 350);
                 grad.addColorStop(0, c1Str);
                 grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad;
