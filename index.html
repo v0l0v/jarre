@@ -1377,11 +1377,11 @@
         worldPalettes.push({
             name: "SECTOR OMEGA",
             description: "ANOMALÍA GRAVITACIONAL AISLANDO EL SECTOR. PELIGRO.",
-            bg: 0x050000,
-            c1: 0xff0000,
-            c2: 0x220000,
-            c3: 0x000000,
-            type: "fire",
+            bg: 0xffffff,
+            c1: 0x00ffff,
+            c2: 0xff00ff,
+            c3: 0xffff00,
+            type: "neon",
             trans_url: "",
             reg_url: ""
         });
@@ -1601,12 +1601,13 @@
 
         // Anomalía (Easter Egg)
         let anomalyActive = false;
-        const anomalyGeo = new THREE.BoxGeometry(100, 300, 100); // Tamaño aumentado considerablemente
-        const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const anomalyGeo = new THREE.CapsuleGeometry(15, 30, 16, 16); 
+        const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 });
         const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
-        const anomalyEdges = new THREE.EdgesGeometry(anomalyGeo);
-        const anomalyLine = new THREE.LineSegments(anomalyEdges, new THREE.LineBasicMaterial({ color: 0xff0000 }));
-        anomalyMesh.add(anomalyLine);
+        
+        const anomalyLight = new THREE.PointLight(0x00ffff, 0, 500);
+        anomalyMesh.add(anomalyLight);
+        
         anomalyMesh.visible = false;
         scene.add(anomalyMesh);
         
@@ -1614,17 +1615,17 @@
             anomalyActive = true;
             anomalyMesh.visible = true;
             anomalyMesh.position.set(
-                (Math.random() > 0.5 ? 400 : -400) + (Math.random() * 200 - 100),
-                (Math.random() * 400) - 200,
-                cameraBaseZ - 600
+                (Math.random() - 0.5) * 800,
+                (Math.random() - 0.5) * 600,
+                cameraBaseZ - (400 + Math.random() * 400)
             );
             anomalyMesh.userData.velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 1, // Velocidad lateral más lenta
-                (Math.random() - 0.5) * 1,
-                (Math.random() * 1) + 0.5  // Velocidad frontal mucho más lenta
+                (Math.random() - 0.5) * 2, 
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2
             );
-            anomalyMesh.userData.lifespan = 800; // Más tiempo en pantalla
-
+            anomalyMesh.userData.maxLifespan = 180 + Math.random() * 180; // 3 a 6 segundos a 60fps
+            anomalyMesh.userData.lifespan = anomalyMesh.userData.maxLifespan;
         }
 
         function updatePortalAppearance(portalObj, idx) {
@@ -1895,6 +1896,16 @@
                 anomalyMesh.position.add(anomalyMesh.userData.velocity);
                 anomalyMesh.rotation.x += 0.01;
                 anomalyMesh.rotation.y += 0.02;
+                
+                const maxLife = anomalyMesh.userData.maxLifespan;
+                const curLife = anomalyMesh.userData.lifespan;
+                let fade = 1.0;
+                if (curLife > maxLife - 60) fade = (maxLife - curLife) / 60.0;
+                else if (curLife < 60) fade = curLife / 60.0;
+                
+                anomalyMesh.material.opacity = fade * 0.9;
+                if (anomalyMesh.children.length > 0) anomalyMesh.children[0].intensity = fade * 500;
+
                 anomalyMesh.userData.lifespan--;
                 if (anomalyMesh.userData.lifespan <= 0) {
                     anomalyActive = false;
@@ -1927,6 +1938,23 @@
                 if (intersects.length > 0) {
                     document.body.style.cursor = 'pointer';
                     const clickedMesh = intersects[0].object;
+                    
+                    if (clickedMesh === anomalyMesh) {
+                        // Hover sobre anomalía = salto instantáneo
+                        anomalyActive = false;
+                        anomalyMesh.visible = false;
+                        document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
+                        planetInfo.style.opacity = '0';
+                        isWarpSpeed = true;
+                        warpTimer = 3.0;
+                        warpTargetX = anomalyMesh.position.x;
+                        warpTargetY = -anomalyMesh.position.y;
+                        warpTargetZ = anomalyMesh.position.z + 100;
+                        pendingWorldIndex = SECRET_INDEX;
+                        playWarpSound(3.0);
+                        return;
+                    }
+                    
                     hoveredIdx = alternativePortals.findIndex(p => p.mesh === clickedMesh);
                     const pObj = alternativePortals[hoveredIdx];
                     if (pObj && pObj.targetIdx !== -1) {
