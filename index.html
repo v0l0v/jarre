@@ -638,8 +638,8 @@
                 surfaceGroup.visible = true;
                 
                 // Configurar cámara para superficie
-                camera.position.set(0, 50, 0);
-                camera.lookAt(0, 50, -100);
+                camera.position.set(0, 500, 0);
+                camera.lookAt(0, 100, -200);
                 camera.fov = 75;
                 camera.updateProjectionMatrix();
                 
@@ -1946,8 +1946,8 @@
             const timeRaw = clock.getElapsedTime();
             
             if (isLanded) {
-                // Lógica de movimiento FPS básico
-                const speed = 400 * delta;
+                // Lógica de movimiento DRON básico
+                const speed = 800 * delta; // Un poco más rápido para el dron
                 if (keys.w) playerVel.z -= speed;
                 if (keys.s) playerVel.z += speed;
                 if (keys.a) playerVel.x -= speed;
@@ -1960,20 +1960,20 @@
                 camera.position.x += playerVel.x * delta;
                 camera.position.z += playerVel.z * delta;
                 
-                // Mantener la cámara ligeramente oscilante al moverse
+                // Mantener la cámara elevada (vista dron)
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
                 if (moveSpeed > 5) {
-                    camera.position.y = 50 + Math.sin(timeRaw * 10) * 2;
+                    camera.position.y = 500 + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
                 } else {
-                    camera.position.y = 50;
+                    camera.position.y = 500 + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
-                // Mirar hacia adelante (con leve giro basado en mouse)
+                // Mirar hacia abajo con un ángulo inclinado hacia adelante (drone view)
                 targetX = mouseX * 0.5;
                 targetY = mouseY * 0.5;
                 camera.lookAt(
                     camera.position.x + targetX, 
-                    camera.position.y - targetY, 
+                    camera.position.y - 400 - targetY, 
                     camera.position.z - 200
                 );
                 
