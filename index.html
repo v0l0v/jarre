@@ -597,7 +597,7 @@
                 alternativePortals.forEach(p => p.mesh.visible = false);
                 document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
                 const uiDiv = document.getElementById('ui');
-                uiDiv.style.top = '10%';
+                uiDiv.style.top = '4%';
                 uiDiv.style.transform = 'translate(-50%, 0)';
                 
                 planetInfo.style.opacity = '0'; // Ocultar el cajetín flotante
@@ -615,8 +615,8 @@
                     const y = v.y;
                     const z = v.z;
                     
-                    // Ruido 3D para montañas (reducido para no deformar en exceso la esfera)
-                    const noise = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 80 + Math.sin(z * 0.01 + y * 0.008) * 30;
+                    // Superficie totalmente esférica (sin ruido de montañas)
+                    const noise = 0;
                     
                     v.normalize().multiplyScalar(2000 + noise);
                     pos.setXYZ(i, v.x, v.y, v.z);
