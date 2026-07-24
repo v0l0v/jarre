@@ -1768,7 +1768,12 @@
             // opacity se animará por CSS o en el render loop
             
             color1.setHex(w.c1);
-            color2.setH        // --- OMEGA WARP ENGINE ---
+            color2.setHex(w.c2);
+            color3.setHex(w.c3);
+            generateParticles();
+        }
+
+        // --- OMEGA WARP ENGINE ---
         const omegaWarpGroup = new THREE.Group();
         scene.add(omegaWarpGroup);
         const warpGeoPlane = new THREE.PlaneGeometry(3000, 3000);
