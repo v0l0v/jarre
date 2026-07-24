@@ -577,6 +577,7 @@
         // Controles de aterrizaje
         let isLanded = false;
         let droneThrust = 0;
+        let droneAltitude = 1000;
         const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
         let playerVel = { x: 0, z: 0 };
         const surfaceGroup = new THREE.Group();
@@ -621,9 +622,7 @@
                 let groundTex = null;
                 if (coreMat.map) {
                     groundTex = coreMat.map.clone();
-                    groundTex.wrapS = THREE.RepeatWrapping;
-                    groundTex.wrapT = THREE.RepeatWrapping;
-                    groundTex.repeat.set(12, 12); // Más repetición para que se vea más nítido de cerca
+                    // Cubrir por completo el planeta sin repetir (quita el efecto cuadrícula)
                     groundTex.needsUpdate = true;
                 }
                 
@@ -661,19 +660,23 @@
         document.addEventListener('keydown', (e) => {
             if (!isLanded) return;
             const k = e.key.toLowerCase();
-            if (k === 'w' || k === 'arrowup') keys.w = true;
+            if (k === 'w') keys.w = true;
+            if (k === 's') keys.s = true;
             if (k === 'a' || k === 'arrowleft') keys.a = true;
-            if (k === 's' || k === 'arrowdown') keys.s = true;
             if (k === 'd' || k === 'arrowright') keys.d = true;
+            if (k === 'arrowup') keys.up = true;
+            if (k === 'arrowdown') keys.down = true;
         });
 
         document.addEventListener('keyup', (e) => {
             if (!isLanded) return;
             const k = e.key.toLowerCase();
-            if (k === 'w' || k === 'arrowup') keys.w = false;
+            if (k === 'w') keys.w = false;
+            if (k === 's') keys.s = false;
             if (k === 'a' || k === 'arrowleft') keys.a = false;
-            if (k === 's' || k === 'arrowdown') keys.s = false;
             if (k === 'd' || k === 'arrowright') keys.d = false;
+            if (k === 'arrowup') keys.up = false;
+            if (k === 'arrowdown') keys.down = false;
         });
         
         const planetInfo = document.getElementById('planet-info');
@@ -1977,21 +1980,25 @@
                     surfacePlane.rotateOnWorldAxis(zAxis, playerVel.x * delta * 0.0015);
                 }
                 
+                // Control de altitud (Zoom In / Zoom Out)
+                if (keys.up) droneAltitude = Math.max(droneAltitude - delta * 1200, 150); // Acercarse (bajar altura)
+                if (keys.down) droneAltitude = Math.min(droneAltitude + delta * 1200, 3000); // Alejarse (subir altura)
+                
                 // Mantener la cámara elevada (vista dron más alta, oscilación)
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
                 if (moveSpeed > 5) {
-                    camera.position.y = 1000 + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
+                    camera.position.y = droneAltitude + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
                 } else {
-                    camera.position.y = 1000 + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
+                    camera.position.y = droneAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
-                // Mirar hacia abajo con un ángulo inclinado hacia adelante (drone view)
+                // Mirar hacia abajo con un ángulo inclinado hacia adelante
                 targetX = mouseX * 0.5;
                 targetY = mouseY * 0.5;
                 camera.lookAt(
                     targetX, 
-                    camera.position.y - 800 - targetY, 
-                    -600
+                    camera.position.y - (droneAltitude * 0.8) - targetY, 
+                    - (droneAltitude * 0.6)
                 );
                 
                 renderer.render(scene, camera);
