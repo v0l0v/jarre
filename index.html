@@ -1371,6 +1371,23 @@
             };
         }
         
+        // --- SECRETO: SECTOR OMEGA ---
+        const SECRET_INDEX = worldPalettes.length;
+        worldPalettes.push({
+            name: "SECTOR OMEGA",
+            description: "ANOMALÍA GRAVITACIONAL AISLANDO EL SECTOR. PELIGRO.",
+            bg: 0x050000,
+            c1: 0xff0000,
+            c2: 0x220000,
+            c3: 0x000000,
+            type: "fire",
+            trans_url: "",
+            reg_url: ""
+        });
+        navMap[SECRET_INDEX] = {
+            right: 0, left: 1, up: 2, down: 3, center: 0, edges: 1
+        };
+        
         let color1 = new THREE.Color(initW.c1);
         let color2 = new THREE.Color(initW.c2);
         let color3 = new THREE.Color(initW.c3);
@@ -1581,6 +1598,33 @@
             alternativePortals.push({ mesh: mesh, mat: mat, targetIdx: -1 });
         }
 
+        // Anomalía (Easter Egg)
+        let anomalyActive = false;
+        const anomalyGeo = new THREE.BoxGeometry(40, 120, 40);
+        const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
+        const anomalyEdges = new THREE.EdgesGeometry(anomalyGeo);
+        const anomalyLine = new THREE.LineSegments(anomalyEdges, new THREE.LineBasicMaterial({ color: 0xff0000 }));
+        anomalyMesh.add(anomalyLine);
+        anomalyMesh.visible = false;
+        scene.add(anomalyMesh);
+        
+        function spawnAnomaly() {
+            anomalyActive = true;
+            anomalyMesh.visible = true;
+            anomalyMesh.position.set(
+                (Math.random() > 0.5 ? 400 : -400) + (Math.random() * 200 - 100),
+                (Math.random() * 400) - 200,
+                cameraBaseZ - 600
+            );
+            anomalyMesh.userData.velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2,
+                (Math.random() * 2) + 2
+            );
+            anomalyMesh.userData.lifespan = 400;
+        }
+
         function updatePortalAppearance(portalObj, idx) {
             const targetWorld = worldPalettes[idx];
             portalObj.mat.map = createPlanetTexture(targetWorld);
@@ -1608,6 +1652,8 @@
             initAudio();
             
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+            if (anomalyActive && anomalyMesh.visible) visibleMeshes.push(anomalyMesh);
+            
             if (visibleMeshes.length === 0) return;
             
             mouseVector.x = normMouseX;
@@ -1618,6 +1664,22 @@
             
             if (intersects.length > 0) {
                 const clickedMesh = intersects[0].object;
+                
+                if (clickedMesh === anomalyMesh) {
+                    anomalyActive = false;
+                    anomalyMesh.visible = false;
+                    document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
+                    planetInfo.style.opacity = '0';
+                    isWarpSpeed = true;
+                    warpTimer = 3.0; // Salto turbulento
+                    warpTargetX = anomalyMesh.position.x;
+                    warpTargetY = -anomalyMesh.position.y;
+                    warpTargetZ = anomalyMesh.position.z + 100;
+                    pendingWorldIndex = SECRET_INDEX;
+                    playWarpSound(3.0);
+                    return;
+                }
+                
                 const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
                 if (pObj) {
                     document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
@@ -1755,6 +1817,9 @@
                         cameraBaseY = 0; 
                         cameraBaseZ = 1200;
                         changeWorld(target, true);
+                        if (Math.random() < 0.05 && !anomalyActive && target !== SECRET_INDEX) {
+                            spawnAnomaly();
+                        }
                     }
                     
                     // Al llegar al punto panorámico, revelamos los portales vecinos
@@ -1823,7 +1888,18 @@
             core.rotation.x = time * 2;
             core.rotation.y = time * 3;
 
-                        // Físicas de cámara y Parallax
+            if (anomalyActive) {
+                anomalyMesh.position.add(anomalyMesh.userData.velocity);
+                anomalyMesh.rotation.x += 0.01;
+                anomalyMesh.rotation.y += 0.02;
+                anomalyMesh.userData.lifespan--;
+                if (anomalyMesh.userData.lifespan <= 0) {
+                    anomalyActive = false;
+                    anomalyMesh.visible = false;
+                }
+            }
+
+            // Físicas de cámara y Parallax
             targetX = mouseX * 1.5;
             targetY = mouseY * 1.5;
             
@@ -1838,6 +1914,8 @@
             let hoveredIdx = -1;
             const isMapVisible = document.getElementById('game-map').style.display === 'flex';
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+            if (anomalyActive && anomalyMesh.visible) visibleMeshes.push(anomalyMesh);
+            
             if (!isMapVisible && visibleMeshes.length > 0) {
                 mouseVector.x = normMouseX;
                 mouseVector.y = normMouseY;
