@@ -577,6 +577,7 @@
         
         // Controles de aterrizaje
         let isLanded = false;
+        let droneThrust = 0;
         const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
         let playerVel = { x: 0, z: 0 };
         const surfaceGroup = new THREE.Group();
@@ -1946,16 +1947,23 @@
             const timeRaw = clock.getElapsedTime();
             
             if (isLanded) {
-                // Lógica de movimiento DRON básico
-                const speed = 800 * delta; // Un poco más rápido para el dron
+                // Lógica de movimiento DRON (con inercia y aceleración progresiva)
+                const isMoving = keys.w || keys.s || keys.a || keys.d;
+                if (isMoving) {
+                    droneThrust = Math.min(droneThrust + delta * 2, 4); // Acelera poco a poco hasta velocidad tope
+                } else {
+                    droneThrust = Math.max(droneThrust - delta * 2, 0); // Decelera al soltar
+                }
+                
+                const speed = 400 * delta * (1 + droneThrust); // La velocidad escala con el thrust
                 if (keys.w) playerVel.z -= speed;
                 if (keys.s) playerVel.z += speed;
                 if (keys.a) playerVel.x -= speed;
                 if (keys.d) playerVel.x += speed;
                 
-                // Fricción
-                playerVel.x *= 0.9;
-                playerVel.z *= 0.9;
+                // Fricción más suave para que patine con inercia como un dron
+                playerVel.x *= 0.94;
+                playerVel.z *= 0.94;
                 
                 camera.position.x += playerVel.x * delta;
                 camera.position.z += playerVel.z * delta;
