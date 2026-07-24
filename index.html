@@ -1653,7 +1653,7 @@
                     if (cx + r > 512) drawDot(cx - 512, cy);
                 }
             } else if (w.type === 'fire') {
-                const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 300);
+                const grad = ctx.createLinearGradient(0, 0, 0, 512);
                 grad.addColorStop(0, c2Str);
                 grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad;
@@ -1672,7 +1672,7 @@
                     }
                 }
             } else if (w.type === 'ice') {
-                const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 350);
+                const grad = ctx.createLinearGradient(0, 0, 0, 512);
                 grad.addColorStop(0, c1Str);
                 grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad;
@@ -1732,7 +1732,7 @@
                     ctx.beginPath(); ctx.arc(Math.random()*128, Math.random()*128, Math.random()*5, 0, Math.PI*2); ctx.fill();
                 }
             } else if (w.type === 'fire') {
-                const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 75);
+                const grad = ctx.createLinearGradient(0, 0, 0, 128);
                 grad.addColorStop(0, c2Str); grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
                 for(let i=0; i<30; i++) {
@@ -1746,7 +1746,7 @@
                     }
                 }
             } else if (w.type === 'ice') {
-                const grad = ctx.createLinearGradient(0, 0, 128, 128);
+                const grad = ctx.createLinearGradient(0, 0, 0, 128);
                 grad.addColorStop(0, c1Str); grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
                 for(let i=0; i<50; i++) {
