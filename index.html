@@ -604,8 +604,10 @@
                 const desc = w.description || w.type;
                 infoDesc.innerHTML = `${desc}<br/><span style="color:#0ff; font-size:0.7rem;">Coordenadas: [X: ${c.x}] [Y: ${c.y}] [Z: ${c.z}]</span>`;
                 planetInfo.style.opacity = '1';
-                planetInfo.style.left = '40px';
-                planetInfo.style.top = '100px';
+                // Centrado en la parte superior
+                const panelWidth = planetInfo.offsetWidth || 250;
+                planetInfo.style.left = (window.innerWidth / 2 - panelWidth / 2) + 'px';
+                planetInfo.style.top = '40px';
                 
                 // Generar terreno
                 if (surfacePlane) surfaceGroup.remove(surfacePlane);
