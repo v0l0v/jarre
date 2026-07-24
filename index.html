@@ -660,23 +660,19 @@
         document.addEventListener('keydown', (e) => {
             if (!isLanded) return;
             const k = e.key.toLowerCase();
-            if (k === 'w') keys.w = true;
-            if (k === 's') keys.s = true;
+            if (k === 'w' || k === 'arrowup') keys.w = true;
+            if (k === 's' || k === 'arrowdown') keys.s = true;
             if (k === 'a' || k === 'arrowleft') keys.a = true;
             if (k === 'd' || k === 'arrowright') keys.d = true;
-            if (k === 'arrowup') keys.up = true;
-            if (k === 'arrowdown') keys.down = true;
         });
 
         document.addEventListener('keyup', (e) => {
             if (!isLanded) return;
             const k = e.key.toLowerCase();
-            if (k === 'w') keys.w = false;
-            if (k === 's') keys.s = false;
+            if (k === 'w' || k === 'arrowup') keys.w = false;
+            if (k === 's' || k === 'arrowdown') keys.s = false;
             if (k === 'a' || k === 'arrowleft') keys.a = false;
             if (k === 'd' || k === 'arrowright') keys.d = false;
-            if (k === 'arrowup') keys.up = false;
-            if (k === 'arrowdown') keys.down = false;
         });
         
         const planetInfo = document.getElementById('planet-info');
@@ -1980,26 +1976,20 @@
                     surfacePlane.rotateOnWorldAxis(zAxis, playerVel.x * delta * 0.0015);
                 }
                 
-                // Control de altitud (Zoom In / Zoom Out)
-                if (keys.up) droneAltitude = Math.max(droneAltitude - delta * 2000, 150); // Acercarse (bajar altura)
-                if (keys.down) droneAltitude = Math.min(droneAltitude + delta * 2000, 3500); // Alejarse (subir altura)
+                // La cámara se mantiene a una distancia constante para que el planeta ocupe ~60% de la pantalla
+                // Centro del planeta en Y = -2000. Altitud de cámara = 3200. Distancia total = 5200.
+                const fixedAltitude = 3200;
                 
-                // Mantener la cámara elevada (vista dron más alta, oscilación)
+                // Mantener la cámara elevada con leve oscilación
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
                 if (moveSpeed > 5) {
-                    camera.position.y = droneAltitude + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
+                    camera.position.y = fixedAltitude + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
                 } else {
-                    camera.position.y = droneAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
+                    camera.position.y = fixedAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
-                // Mirar hacia abajo y adelante dinámicamente según la altura
-                targetX = mouseX * 0.5;
-                targetY = mouseY * 0.5;
-                camera.lookAt(
-                    targetX, 
-                    camera.position.y - Math.max(1000, droneAltitude) - targetY, 
-                    -Math.max(500, droneAltitude * 0.4)
-                );
+                // Mirar exactamente al centro de la esfera (0, -2000, 0)
+                camera.lookAt(0, -2000, 0);
                 
                 renderer.render(scene, camera);
                 return; // Saltarse la lógica orbital
