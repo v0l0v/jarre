@@ -640,10 +640,13 @@
                 surfaceGroup.visible = true;
                 
                 // Configurar cámara para superficie (inmóvil en X/Z)
-                camera.position.set(0, 1800, 0);
-                camera.lookAt(0, -2000, 0);
+                camera.position.set(0, 800, 0); // Mucho más cerca de la superficie
+                camera.lookAt(0, -1000, -1500); // Apuntar hacia adelante para ver el horizonte
                 camera.fov = 75;
                 camera.updateProjectionMatrix();
+                
+                // Reducir la niebla para que no oculte el planeta
+                scene.fog.density = 0.00015;
                 
             } else {
                 btn.title = "Inspeccionar Superficie";
@@ -654,6 +657,9 @@
                 
                 camera.fov = 60;
                 camera.updateProjectionMatrix();
+                
+                // Restaurar niebla del espacio
+                scene.fog.density = 0.0008;
             }
         }
         
@@ -1976,9 +1982,9 @@
                     surfacePlane.rotateOnWorldAxis(zAxis, playerVel.x * delta * 0.0015);
                 }
                 
-                // La cámara se mantiene a una distancia constante para que el planeta ocupe ~60% de la pantalla (ancho panorámico)
-                // Centro del planeta en Y = -2000. Altitud de cámara = 1800. Distancia total = 3800.
-                const fixedAltitude = 1800;
+                // La cámara se mantiene a una distancia constante 
+                // Altitud = 800. Para que el horizonte (la mitad superior de la esfera) ocupe la pantalla.
+                const fixedAltitude = 800;
                 
                 // Mantener la cámara elevada con leve oscilación
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
@@ -1988,8 +1994,10 @@
                     camera.position.y = fixedAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
-                // Mirar exactamente al centro de la esfera (0, -2000, 0)
-                camera.lookAt(0, -2000, 0);
+                // Mirar hacia el horizonte esférico
+                targetX = mouseX * 0.5;
+                targetY = mouseY * 0.5;
+                camera.lookAt(targetX, -1000 - targetY, -1500);
                 
                 renderer.render(scene, camera);
                 return; // Saltarse la lógica orbital
