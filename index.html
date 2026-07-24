@@ -1601,37 +1601,39 @@
             alternativePortals.push({ mesh: mesh, mat: mat, targetIdx: -1 });
         }
 
-        // Anomalía (Easter Egg)
-        let anomalyActive = false;
+        // Estrella Omega (fija en el fondo)
         let omegaDiscovered = false;
-        const anomalyGeo = new THREE.TorusGeometry(15, 2, 16, 64); // Una mirilla / anillo
-        const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 });
-        const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
-        
-        const anomalyLight = new THREE.PointLight(0x00ffff, 0, 500);
-        anomalyMesh.add(anomalyLight);
-        
-        // Área invisible más grande para facilitar el hover
-        const hitBoxGeo = new THREE.SphereGeometry(40, 8, 8);
+        const omegaStarGroup = new THREE.Group();
+        omegaStarGroup.position.set(-600, 350, -2500); // Fija al fondo del espacio
+
+        // Núcleo de la estrella (pequeño y brillante)
+        const starGeo = new THREE.SphereGeometry(6, 16, 16);
+        const starMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+        const starMesh = new THREE.Mesh(starGeo, starMat);
+        omegaStarGroup.add(starMesh);
+
+        // Luz que desprende
+        const starLight = new THREE.PointLight(0x00ffff, 1, 600);
+        omegaStarGroup.add(starLight);
+
+        // Anillos expansivos
+        const rings = [];
+        for (let i = 0; i < 3; i++) {
+            const ringGeo = new THREE.RingGeometry(0.1, 1, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.userData = { phase: i * (Math.PI * 2 / 3) }; // Desfasaje entre los 3 anillos
+            omegaStarGroup.add(ring);
+            rings.push(ring);
+        }
+
+        // Hitbox grande invisible para facilitar el clic/hover
+        const hitBoxGeo = new THREE.SphereGeometry(80, 8, 8);
         const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
         const hitBoxMesh = new THREE.Mesh(hitBoxGeo, hitBoxMat);
-        anomalyMesh.add(hitBoxMesh);
+        omegaStarGroup.add(hitBoxMesh);
 
-        anomalyMesh.visible = false;
-        scene.add(anomalyMesh);
-        
-        function spawnAnomaly() {
-            anomalyActive = true;
-            anomalyMesh.visible = true;
-            anomalyMesh.position.set(
-                (Math.random() - 0.5) * 500, // Spawn más centrado
-                (Math.random() - 0.5) * 400,
-                cameraBaseZ - (600 + Math.random() * 200) // Un poco más lejos para que el Parallax no lo tape rápido
-            );
-            anomalyMesh.userData.velocity = new THREE.Vector3(0, 0, 0); // Estático
-            anomalyMesh.userData.maxLifespan = 180 + Math.random() * 180; // 3 a 6 segundos a 60fps
-            anomalyMesh.userData.lifespan = anomalyMesh.userData.maxLifespan;
-        }
+        scene.add(omegaStarGroup);
 
         function updatePortalAppearance(portalObj, idx) {
             const targetWorld = worldPalettes[idx];
@@ -1829,9 +1831,6 @@
                         cameraBaseY = 0; 
                         cameraBaseZ = 1200;
                         changeWorld(target, true);
-                        if (Math.random() < 1.0 && !anomalyActive && target !== SECRET_INDEX) {
-                            spawnAnomaly();
-                        }
                     }
                     
                     // Al llegar al punto panorámico, revelamos los portales vecinos
@@ -1900,28 +1899,18 @@
             core.rotation.x = time * 2;
             core.rotation.y = time * 3;
 
-            if (anomalyActive) {
-                // Latido suave
-                const pulse = 1.0 + Math.sin(time * 5.0) * 0.15;
-                anomalyMesh.scale.set(pulse, pulse, pulse);
-                
-                // Rotación sutil
-                anomalyMesh.rotation.z += 0.01;
-                
-                const maxLife = anomalyMesh.userData.maxLifespan;
-                const curLife = anomalyMesh.userData.lifespan;
-                let fade = 1.0;
-                if (curLife > maxLife - 60) fade = (maxLife - curLife) / 60.0;
-                else if (curLife < 60) fade = curLife / 60.0;
-                
-                anomalyMesh.material.opacity = fade * 0.9;
-                if (anomalyMesh.children.length > 0) anomalyMesh.children[0].intensity = fade * 500;
-
-                anomalyMesh.userData.lifespan--;
-                if (anomalyMesh.userData.lifespan <= 0) {
-                    anomalyActive = false;
-                    anomalyMesh.visible = false;
-                }
+            // Lógica de la estrella hacia Omega (Animación de anillos)
+            omegaStarGroup.visible = (currentWorld !== SECRET_INDEX);
+            if (omegaStarGroup.visible) {
+                // Animar los anillos concéntricos
+                rings.forEach(ring => {
+                    ring.userData.phase += delta * 1.5; // Velocidad de expansión
+                    let size = (ring.userData.phase % 3.0) * 15 + 1; // Tamaño maximo
+                    ring.scale.set(size, size, 1);
+                    
+                    let op = 1.0 - ((ring.userData.phase % 3.0) / 3.0);
+                    ring.material.opacity = Math.max(0, op * 0.8); // Se desvanece sutilmente al crecer
+                });
             }
 
             // Físicas de cámara y Parallax
@@ -1939,7 +1928,7 @@
             let hoveredIdx = -1;
             const isMapVisible = document.getElementById('game-map').style.display === 'flex';
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
-            if (anomalyActive && anomalyMesh.visible) visibleMeshes.push(anomalyMesh);
+            if (omegaStarGroup.visible) visibleMeshes.push(omegaStarGroup);
             
             if (!isMapVisible && visibleMeshes.length > 0) {
                 mouseVector.x = normMouseX;
@@ -1948,22 +1937,24 @@
                 const intersects = raycaster.intersectObjects(visibleMeshes, true);
                 if (intersects.length > 0) {
                     document.body.style.cursor = 'pointer';
-                    // Si choca con el hitbox o la anomalía, referenciamos al padre (la anomalía en sí)
+                    // Verificamos si hizo hover en alguna parte del Omega Star
                     let clickedMesh = intersects[0].object;
-                    if (clickedMesh.parent === anomalyMesh) clickedMesh = anomalyMesh;
+                    let isOmega = false;
+                    clickedMesh.traverseAncestors((ancestor) => {
+                        if (ancestor === omegaStarGroup) isOmega = true;
+                    });
+                    if (clickedMesh === omegaStarGroup) isOmega = true;
                     
-                    if (clickedMesh === anomalyMesh) {
-                        // Hover sobre anomalía = salto instantáneo
-                        anomalyActive = false;
-                        anomalyMesh.visible = false;
+                    if (isOmega) {
+                        // Hover sobre la estrellita misteriosa = salto instantáneo
                         omegaDiscovered = true;
                         document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
                         planetInfo.style.opacity = '0';
                         isWarpSpeed = true;
                         warpTimer = 3.0;
-                        warpTargetX = anomalyMesh.position.x;
-                        warpTargetY = -anomalyMesh.position.y;
-                        warpTargetZ = anomalyMesh.position.z + 100;
+                        warpTargetX = omegaStarGroup.position.x;
+                        warpTargetY = -omegaStarGroup.position.y;
+                        warpTargetZ = omegaStarGroup.position.z + 100;
                         pendingWorldIndex = SECRET_INDEX;
                         playWarpSound(3.0);
                         return;
