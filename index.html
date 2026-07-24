@@ -1664,7 +1664,7 @@
 
         // Anomalía (Easter Egg)
         let anomalyActive = false;
-        const anomalyGeo = new THREE.BoxGeometry(40, 120, 40);
+        const anomalyGeo = new THREE.BoxGeometry(100, 300, 100); // Tamaño aumentado considerablemente
         const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
         const anomalyEdges = new THREE.EdgesGeometry(anomalyGeo);
@@ -1682,11 +1682,12 @@
                 cameraBaseZ - 600
             );
             anomalyMesh.userData.velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 2,
-                (Math.random() - 0.5) * 2,
-                (Math.random() * 2) + 2
+                (Math.random() - 0.5) * 1, // Velocidad lateral más lenta
+                (Math.random() - 0.5) * 1,
+                (Math.random() * 1) + 0.5  // Velocidad frontal mucho más lenta
             );
-            anomalyMesh.userData.lifespan = 400;
+            anomalyMesh.userData.lifespan = 800; // Más tiempo en pantalla
+
         }
 
         function updatePortalAppearance(portalObj, idx) {
