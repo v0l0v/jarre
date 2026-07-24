@@ -26,6 +26,15 @@
             opacity: 1;
             transition: opacity 0.5s ease;
         }
+        #cosmic-flash {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 1.5s ease-out;
+        }
         #aura-links {
             display: none;
             justify-content: center;
@@ -347,10 +356,10 @@
             </button>
             <video id="aura-player" src="" controls loop playsinline></video>
             <iframe id="aura-iframe" src=""></iframe>
-            <div class="crt-overlay" style="opacity: 0.3;"></div>
-            <div class="vignette" style="opacity: 0.5;"></div>
         </div>
     </div>
+    
+    <div id="cosmic-flash"></div>
 
     <script>
         let isModalOpen = false;
@@ -1041,8 +1050,9 @@
             }
 
             keyBuffer += event.key.toLowerCase();
-            if (keyBuffer.length > 4) keyBuffer = keyBuffer.slice(-4);
-            if (keyBuffer === 'term') {
+            if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5);
+            
+            if (keyBuffer.endsWith('term')) {
                 event.preventDefault();
                 openTerminal();
                 keyBuffer = '';
@@ -1052,6 +1062,21 @@
                 event.preventDefault();
                 openMap();
                 keyBuffer = '';
+                return;
+            }
+            if (keyBuffer.endsWith('omega')) {
+                event.preventDefault();
+                keyBuffer = '';
+                omegaDiscovered = true;
+                document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
+                planetInfo.style.opacity = '0';
+                isWarpSpeed = true;
+                warpTimer = 15.0; // Salto largo
+                warpTargetX = 0;
+                warpTargetY = 0;
+                warpTargetZ = 5000;
+                pendingWorldIndex = SECRET_INDEX;
+                playWarpSound(15.0);
                 return;
             }
 
@@ -1601,34 +1626,7 @@
             alternativePortals.push({ mesh: mesh, mat: mat, targetIdx: -1 });
         }
 
-        // Estrella Omega (fija en el fondo)
         let omegaDiscovered = false;
-        const omegaStarGroup = new THREE.Group();
-        // La acercamos un poco (z = -1200) para que la niebla negra no la oculte
-        omegaStarGroup.position.set(200, 150, -1200); 
-
-        // Núcleo de la estrella (más grande para que se vea sin hitbox extra)
-        const starGeo = new THREE.SphereGeometry(15, 16, 16);
-        const starMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-        const starMesh = new THREE.Mesh(starGeo, starMat);
-        omegaStarGroup.add(starMesh);
-
-        // Luz que desprende
-        const starLight = new THREE.PointLight(0x00ffff, 1, 600);
-        omegaStarGroup.add(starLight);
-
-        // Anillos expansivos
-        const rings = [];
-        for (let i = 0; i < 3; i++) {
-            const ringGeo = new THREE.RingGeometry(0.1, 1, 32);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
-            const ring = new THREE.Mesh(ringGeo, ringMat);
-            ring.userData = { phase: i * (Math.PI * 2 / 3) }; 
-            omegaStarGroup.add(ring);
-            rings.push(ring);
-        }
-
-        scene.add(omegaStarGroup);
 
         function updatePortalAppearance(portalObj, idx) {
             const targetWorld = worldPalettes[idx];
@@ -1790,12 +1788,18 @@
             
             // Lógica de Velocidad Láser y desplazamiento
             if (isWarpSpeed) {
-                
+                targetSpeed = 40;
                 warpTimer -= delta;
-                targetSpeed = 15.0; 
-                fovTarget = 140; 
                 
-                // Mover base de la cámara hacia el objetivo aleatorio
+                // Lógica del flash cósmico
+                if (pendingWorldIndex === SECRET_INDEX) {
+                    const cosmicFlash = document.getElementById('cosmic-flash');
+                    if (warpTimer <= 2.0 && warpTimer > 0) {
+                        cosmicFlash.style.opacity = '1';
+                    }
+                }
+                
+                // Movimiento hacia el objetivo del salto
                 cameraBaseX += (warpTargetX - cameraBaseX) * 0.03;
                 cameraBaseY += (warpTargetY - cameraBaseY) * 0.03;
                 cameraBaseZ += (warpTargetZ - cameraBaseZ) * 0.03;
@@ -1811,6 +1815,8 @@
                         cameraBaseZ = 1200;
                         changeWorld(target, true);
                     }
+                    
+                    document.getElementById('cosmic-flash').style.opacity = '0';
                     
                     // Al llegar al punto panorámico, revelamos los portales vecinos
                     if (activeNeighbors.length > 0 && anchorPlanet) {
@@ -1878,20 +1884,6 @@
             core.rotation.x = time * 2;
             core.rotation.y = time * 3;
 
-            // Lógica de la estrella hacia Omega (Animación de anillos)
-            omegaStarGroup.visible = (currentWorld !== SECRET_INDEX);
-            if (omegaStarGroup.visible) {
-                // Animar los anillos concéntricos
-                rings.forEach(ring => {
-                    ring.userData.phase += delta * 1.5; // Velocidad de expansión
-                    let size = (ring.userData.phase % 3.0) * 15 + 1; // Tamaño maximo
-                    ring.scale.set(size, size, 1);
-                    
-                    let op = 1.0 - ((ring.userData.phase % 3.0) / 3.0);
-                    ring.material.opacity = Math.max(0, op * 0.8); // Se desvanece sutilmente al crecer
-                });
-            }
-
             // Físicas de cámara y Parallax
             targetX = mouseX * 1.5;
             targetY = mouseY * 1.5;
@@ -1907,7 +1899,6 @@
             let hoveredIdx = -1;
             const isMapVisible = document.getElementById('game-map').style.display === 'flex';
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
-            if (omegaStarGroup.visible) visibleMeshes.push(omegaStarGroup);
             
             if (!isMapVisible && visibleMeshes.length > 0) {
                 mouseVector.x = normMouseX;
@@ -1916,28 +1907,7 @@
                 const intersects = raycaster.intersectObjects(visibleMeshes, true);
                 if (intersects.length > 0) {
                     document.body.style.cursor = 'pointer';
-                    // Verificamos si hizo hover en alguna parte del Omega Star
                     let clickedMesh = intersects[0].object;
-                    let isOmega = false;
-                    clickedMesh.traverseAncestors((ancestor) => {
-                        if (ancestor === omegaStarGroup) isOmega = true;
-                    });
-                    if (clickedMesh === omegaStarGroup) isOmega = true;
-                    
-                    if (isOmega) {
-                        // Hover sobre la estrellita misteriosa = salto instantáneo
-                        omegaDiscovered = true;
-                        document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
-                        planetInfo.style.opacity = '0';
-                        isWarpSpeed = true;
-                        warpTimer = 3.0;
-                        warpTargetX = omegaStarGroup.position.x;
-                        warpTargetY = -omegaStarGroup.position.y;
-                        warpTargetZ = omegaStarGroup.position.z + 100;
-                        pendingWorldIndex = SECRET_INDEX;
-                        playWarpSound(3.0);
-                        return;
-                    }
                     
                     hoveredIdx = alternativePortals.findIndex(p => p.mesh === clickedMesh);
                     const pObj = alternativePortals[hoveredIdx];
