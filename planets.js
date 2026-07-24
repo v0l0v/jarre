@@ -59,8 +59,9 @@ const worldPalettes = [
         "c1": 578022,
         "c2": 10021682,
         "c3": 14734055,
-        "type": "toxic",
-        "description": "Planeta generado por consola."
+        "type": "",
+        "description": "Tormentas imaginarias al borde del abismo",
+        "texture_url": "assets/planeta/espejismo9/textura.jpg"
     },
     {
         "name": "JMJARRE 10",
@@ -69,7 +70,8 @@ const worldPalettes = [
         "c2": 14178227,
         "c3": 3556942,
         "type": "ice",
-        "description": "La estructura del universo al descubierto en una sola nota visual."
+        "description": "La estructura del universo al descubierto en una sola nota visual.",
+        "texture_url": "assets/planeta/jmjarre10/textura.png"
     },
     {
         "name": "LES ROBOTS",
@@ -79,7 +81,8 @@ const worldPalettes = [
         "c3": 3740569,
         "type": "neon",
         "description": "Mechanical men from outer space, programmed to make astonishing instrumental music!",
-        "hasTransmission": false
+        "hasTransmission": false,
+        "texture_url": "assets/planeta/lesrobots/textura.jpg"
     },
     {
         "name": "AZKENA RF",

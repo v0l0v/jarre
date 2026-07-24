@@ -466,14 +466,30 @@
             triggerJump();
         });
 
+        let zoomLevel = 60;
+
         document.addEventListener('keydown', (event) => {
             initAudio();
             if (isWarpSpeed) return;
             
-            if (event.key === 'ArrowUp' || event.key === 'w' || event.key === 'W') triggerDirectionalJump('up');
-            else if (event.key === 'ArrowDown' || event.key === 's' || event.key === 'S') triggerDirectionalJump('down');
-            else if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') triggerDirectionalJump('left');
-            else if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') triggerDirectionalJump('right');
+            const k = event.key.toLowerCase();
+            
+            if (k === 'q') {
+                zoomLevel += 5;
+                if (zoomLevel > 90) zoomLevel = 90;
+                camera.zoom = zoomLevel / 60;
+                camera.updateProjectionMatrix();
+            } else if (k === 'a') {
+                zoomLevel -= 5;
+                if (zoomLevel < 30) zoomLevel = 30;
+                camera.zoom = zoomLevel / 60;
+                camera.updateProjectionMatrix();
+            }
+            
+            if (event.key === 'ArrowUp') triggerDirectionalJump('up');
+            else if (event.key === 'ArrowDown') triggerDirectionalJump('down');
+            else if (event.key === 'ArrowLeft') triggerDirectionalJump('left');
+            else if (event.key === 'ArrowRight') triggerDirectionalJump('right');
             else if (event.key === 'Enter' || event.key === ' ') {
                 if (portal.visible) changeWorld(pendingWorldIndex);
             }

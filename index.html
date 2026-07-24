@@ -85,35 +85,7 @@
             margin-top: 1rem;
             font-weight: 300;
         }
-        .random-warp-btn {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
-            color: #fff;
-            text-decoration: none;
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            z-index: 20;
-            cursor: pointer;
-        }
-        .random-warp-btn:hover {
-            background: #fff;
-            color: #000;
-            transform: scale(1.15) rotate(180deg);
-            box-shadow: 0 0 25px rgba(0, 238, 255, 0.6);
-            border-color: #00eeff;
-        }
-        .random-warp-btn svg {
-            width: 32px;
-            height: 32px;
-        }
+
         
         .fullscreen-btn {
             position: absolute;
@@ -197,10 +169,22 @@
             color: #ccc;
         }
         /* Modal AURA Transmission */
-        #aura-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(0, 0, 0, 0.3); justify-content: center; align-items: center; opacity: 0; transition: opacity 2s ease; }
-        #aura-modal-content { position: relative; width: min(80vw, 80vh); height: min(80vw, 80vh); border-radius: 50%; overflow: hidden; border: 2px solid rgba(0, 238, 255, 0.5); box-shadow: 0 0 50px rgba(0, 238, 255, 0.4), inset 0 0 20px rgba(0,238,255,0.5); display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; background: #000; transition: border-radius 0.5s ease, width 0.5s ease, height 0.5s ease; }
+        #aura-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: rgba(0, 0, 0, 0.3); justify-content: center; align-items: center; opacity: 0; transition: opacity 2s ease; pointer-events: none; }
+        #aura-modal-content { position: relative; width: min(80vw, 80vh); height: min(80vw, 80vh); border-radius: 50%; overflow: hidden; border: 2px solid rgba(0, 238, 255, 0.5); box-shadow: 0 0 50px rgba(0, 238, 255, 0.4), inset 0 0 20px rgba(0,238,255,0.5); display: flex; justify-content: center; align-items: center; transform: scale(0); opacity: 0; background: #000; transition: all 0.5s ease; pointer-events: auto; }
         #aura-modal-content.is-document { border-radius: 15px; width: min(90vw, 900px); height: min(80vh, 700px); }
         #aura-modal-content.portal-open { animation: spaceWarpOpen 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        #aura-modal-content.minimized { 
+            position: fixed; 
+            bottom: -9999px; 
+            right: -9999px; 
+            width: 1px !important; 
+            height: 1px !important; 
+            border-radius: 0 !important; 
+            animation: none !important; 
+            transform: scale(0) !important;
+            opacity: 0 !important;
+            pointer-events: none;
+        }
         #aura-modal-content.is-document.portal-open { animation: holoOpen 1.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
         #aura-modal-content.portal-close { animation: spaceWarpClose 2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
         #aura-modal-content.is-document.portal-close { animation: holoClose 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
@@ -341,19 +325,19 @@
             box-shadow: 0 0 20px rgba(0, 238, 255, 0.6);
             transform: scale(1.1);
         }
-        #btn-map { left: 20px; }
+        #btn-warp { left: 20px; }
+        #btn-map { left: 90px; }
+        #btn-land { left: 160px; }
         #btn-term { right: 20px; }
-        #btn-land { left: 90px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
     <div id="aura-modal">
         <div id="aura-modal-content">
-            <button class="close-modal-btn" onclick="closeAuraModal()" title="Cerrar Visor">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                </svg>
+            <button class="minimize-modal-btn" onclick="toggleMinimizeAuraModal()" title="Minimizar / Explorar" style="position: absolute; top: 20px; right: 70px; z-index: 10; background: transparent; border: none; color: white; opacity: 0.7; cursor: pointer; width: 40px; height: 40px; transition: all 0.3s ease; font-family: monospace; font-size: 28px; font-weight: bold; line-height: 40px; display: flex; justify-content: center; align-items: center;">
+                _
+            </button>
+            <button class="close-modal-btn" onclick="closeAuraModal()" title="Cerrar Visor" style="font-family: monospace; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center;">
+                X
             </button>
             <video id="aura-player" src="" controls loop playsinline></video>
             <iframe id="aura-iframe" src=""></iframe>
@@ -364,6 +348,25 @@
 
     <script>
         let isModalOpen = false;
+        let isModalMinimized = false;
+        
+        function toggleMinimizeAuraModal() {
+            const modal = document.getElementById('aura-modal');
+            const content = document.getElementById('aura-modal-content');
+            const restoreBtn = document.getElementById('btn-restore');
+            isModalMinimized = !isModalMinimized;
+            if (isModalMinimized) {
+                content.classList.add('minimized');
+                modal.style.background = 'transparent';
+                if (restoreBtn) restoreBtn.style.display = 'flex';
+                isModalOpen = false; // Permitir controles mientras está minimizado
+            } else {
+                content.classList.remove('minimized');
+                modal.style.background = ''; // Vuelve al rgba por defecto
+                if (restoreBtn) restoreBtn.style.display = 'none';
+                isModalOpen = true; // Bloquear controles al maximizar
+            }
+        }
         
         function toggleFullScreen(elem) {
             if (!document.fullscreenElement) {
@@ -377,14 +380,19 @@
         
         function openAuraModal(url) {
             isModalOpen = true;
+            isModalMinimized = false;
             const modal = document.getElementById('aura-modal');
             const content = document.getElementById('aura-modal-content');
+            const restoreBtn = document.getElementById('btn-restore');
+            if (restoreBtn) restoreBtn.style.display = 'none';
+            
             modal.style.display = 'flex';
             void modal.offsetWidth;
             modal.style.opacity = '1';
             
             content.classList.remove('portal-close');
             content.classList.add('portal-open');
+            content.classList.remove('minimized');
             
             const player = document.getElementById('aura-player');
             const iframe = document.getElementById('aura-iframe');
@@ -434,11 +442,16 @@
 
         function closeAuraModal() {
             isModalOpen = false;
+            isModalMinimized = false;
             const modal = document.getElementById('aura-modal');
             const content = document.getElementById('aura-modal-content');
+            const restoreBtn = document.getElementById('btn-restore');
+            if (restoreBtn) restoreBtn.style.display = 'none';
+            modal.style.background = ''; // resetear al default
             
             content.classList.remove('portal-open');
             content.classList.add('portal-close');
+            content.classList.remove('minimized');
             
             modal.style.opacity = '0';
             
@@ -497,13 +510,13 @@
         </div>
     </div>
     
-    <a href="#" onclick="randomAbsurdWarp(); return false;" class="random-warp-btn" title="Velocidad Absurda Aleatoria">
+    <button id="btn-warp" class="hud-btn" onclick="randomAbsurdWarp()" title="Velocidad Absurda Aleatoria">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
             <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
             <circle cx="12" cy="12" r="2"/>
         </svg>
-    </a>
+    </button>
 
     <a href="#" onclick="toggleFullScreen(document.documentElement); return false;" class="fullscreen-btn" title="Pantalla Completa">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -523,6 +536,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+        </svg>
+    </button>
+    <button id="btn-restore" class="hud-btn" onclick="toggleMinimizeAuraModal()" title="Restaurar Reproductor" style="display: none; left: 230px; background: rgba(0,255,0,0.2); border-color: #0f0; color: #0f0;">
+        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
         </svg>
     </button>
     <button id="btn-map" class="hud-btn" onclick="openMap()" title="Mapa Estelar">
@@ -577,7 +595,7 @@
         // Controles de aterrizaje
         let isLanded = false;
         let droneThrust = 0;
-        let droneAltitude = 2500;
+        let droneAltitude = 800;
         const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
         let playerVel = { x: 0, z: 0 };
         const surfaceGroup = new THREE.Group();
@@ -591,14 +609,17 @@
             const btn = document.getElementById('btn-land');
             
             if (isLanded) {
+                if (isModalOpen && !isModalMinimized) {
+                    toggleMinimizeAuraModal();
+                }
+                
                 btn.title = "Volver a Órbita";
                 // Ocultar elementos espaciales (pero no las estrellas)
                 core.visible = false;
                 alternativePortals.forEach(p => p.mesh.visible = false);
                 document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
                 const uiDiv = document.getElementById('ui');
-                uiDiv.style.top = '4%';
-                uiDiv.style.transform = 'translate(-50%, 0)';
+                uiDiv.style.display = 'none';
                 
                 planetInfo.style.opacity = '0'; // Ocultar el cajetín flotante
                 
@@ -611,9 +632,6 @@
                 const v = new THREE.Vector3();
                 for (let i = 0; i < pos.count; i++) {
                     v.fromBufferAttribute(pos, i);
-                    const x = v.x;
-                    const y = v.y;
-                    const z = v.z;
                     
                     // Superficie totalmente esférica (sin ruido de montañas)
                     const noise = 0;
@@ -630,6 +648,7 @@
                     groundTex.needsUpdate = true;
                 }
                 
+                const w = worldPalettes[currentWorld];
                 const mat = new THREE.MeshBasicMaterial({ 
                     map: groundTex,
                     color: groundTex ? 0xffffff : w.c2,
@@ -657,36 +676,66 @@
                 surfaceGroup.visible = false;
                 
                 core.visible = true;
+                alternativePortals.forEach(p => p.mesh.visible = true);
+                document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'block');
                 planetInfo.style.opacity = '1';
                 
-                camera.fov = 60;
+                camera.fov = 75;
                 camera.updateProjectionMatrix();
                 
                 const uiDiv = document.getElementById('ui');
+                uiDiv.style.display = 'block';
                 uiDiv.style.top = '50%';
                 uiDiv.style.transform = 'translate(-50%, -50%)';
+                
+                if (isModalMinimized) {
+                    toggleMinimizeAuraModal();
+                }
                 
                 // Restaurar niebla del espacio
                 scene.fog.density = 0.0008;
             }
         }
         
+        let orbitZoom = 1200;
+
         document.addEventListener('keydown', (e) => {
-            if (!isLanded) return;
             const k = e.key.toLowerCase();
-            if (k === 'w' || k === 'arrowup') keys.w = true;
-            if (k === 's' || k === 'arrowdown') keys.s = true;
-            if (k === 'a' || k === 'arrowleft') keys.a = true;
-            if (k === 'd' || k === 'arrowright') keys.d = true;
+            
+            if (k === 'q') {
+                if (isLanded) {
+                    droneAltitude -= 50;
+                    if (droneAltitude < 100) droneAltitude = 100;
+                } else {
+                    orbitZoom -= 100;
+                    if (orbitZoom < 600) orbitZoom = 600;
+                    cameraBaseZ = orbitZoom;
+                }
+            } else if (k === 'a') {
+                if (isLanded) {
+                    droneAltitude += 50;
+                    if (droneAltitude > 2000) droneAltitude = 2000;
+                } else {
+                    orbitZoom += 100;
+                    if (orbitZoom > 3000) orbitZoom = 3000;
+                    cameraBaseZ = orbitZoom;
+                }
+            }
+
+            if (!isLanded) return;
+            if (k === 'arrowup') keys.w = true;
+            if (k === 'arrowdown') keys.s = true;
+            if (k === 'arrowleft') keys.a = true;
+            if (k === 'arrowright') keys.d = true;
         });
 
         document.addEventListener('keyup', (e) => {
             if (!isLanded) return;
             const k = e.key.toLowerCase();
-            if (k === 'w' || k === 'arrowup') keys.w = false;
-            if (k === 's' || k === 'arrowdown') keys.s = false;
-            if (k === 'a' || k === 'arrowleft') keys.a = false;
-            if (k === 'd' || k === 'arrowright') keys.d = false;
+            if (k === 'arrowup') keys.w = false;
+            if (k === 'arrowdown') keys.s = false;
+            if (k === 'arrowleft') keys.a = false;
+            if (k === 'arrowright') keys.d = false;
         });
         
         const planetInfo = document.getElementById('planet-info');
@@ -806,6 +855,8 @@
         }
 
         function triggerJump() {
+            if (isLanded) return;
+            
             let nx = normMouseX; // -1 a 1 (Izquierda a Derecha)
             let ny = normMouseY; // -1 a 1 (Abajo a Arriba)
             
@@ -1728,8 +1779,6 @@
         // Núcleo (Planeta Actual)
         const coreMat = new THREE.MeshBasicMaterial({ 
             color: 0xffffff, 
-            transparent: true, 
-            opacity: 0.8,
             map: createPlanetTexture(worldPalettes[currentWorld])
         });
         const core = new THREE.Mesh(getPlanetGeometry(currentWorld, 400), coreMat);
@@ -1738,7 +1787,7 @@
         // Portales alternativos (hasta 4 vecinos)
         const alternativePortals = [];
         for (let i = 0; i < 4; i++) {
-            const mat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const mesh = new THREE.Mesh(getPlanetGeometry(0, 150), mat);
             mesh.visible = false;
             scene.add(mesh);
@@ -1770,10 +1819,10 @@
         const mouseVector = new THREE.Vector2();
 
         document.addEventListener('click', (event) => {
-            if (isModalOpen) return;
             initAudio();
             
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+            if (core && core.visible) visibleMeshes.push(core);
             
             if (visibleMeshes.length === 0) return;
             
@@ -1785,6 +1834,11 @@
             
             if (intersects.length > 0) {
                 const clickedMesh = intersects[0].object;
+                
+                if (clickedMesh === core) {
+                    toggleLanding();
+                    return;
+                }
                 
                 const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
                 if (pObj) {
@@ -1991,15 +2045,12 @@
                 }
                 
                 // La cámara se mantiene a una distancia constante 
-                // Altitud = 800. Para que el horizonte (la mitad superior de la esfera) ocupe la pantalla.
-                const fixedAltitude = 800;
-                
                 // Mantener la cámara elevada con leve oscilación
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
                 if (moveSpeed > 5) {
-                    camera.position.y = fixedAltitude + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
+                    camera.position.y = droneAltitude + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
                 } else {
-                    camera.position.y = fixedAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
+                    camera.position.y = droneAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
                 // Mirar hacia el horizonte esférico
@@ -2050,7 +2101,7 @@
                         pendingWorldIndex = -1;
                         cameraBaseX = 0; 
                         cameraBaseY = 0; 
-                        cameraBaseZ = 1200;
+                        cameraBaseZ = orbitZoom;
                         changeWorld(target, true);
                     }
                     
@@ -2192,7 +2243,6 @@
 
         // Eventos de usuario
         function onDocumentMouseMove(event) {
-            if (isModalOpen) return;
             if (document.getElementById('game-map').style.display === 'flex') return;
             
             mouseX = event.clientX - windowHalfX;
@@ -2222,7 +2272,6 @@
         }
         let lastTapTime = 0;
         function onDocumentTouchStart(event) {
-            if (isModalOpen) return;
             initAudio();
             if (event.touches.length === 1) {
                 const now = new Date().getTime();
@@ -2237,18 +2286,25 @@
                     // Doble toque en móviles detectado
                     triggerJump();
                 } else {
-                    // Toque simple, intentamos hacer clic en el portal
+                    // Toque simple, intentamos hacer clic en el portal o planeta
                     mouseVector.x = normMouseX;
                     mouseVector.y = normMouseY;
                     raycaster.setFromCamera(mouseVector, camera);
                     const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
+                    if (core && core.visible) visibleMeshes.push(core);
+                    
                     if (visibleMeshes.length > 0) {
                         const intersects = raycaster.intersectObjects(visibleMeshes);
                         if (intersects.length > 0) {
                             const clickedMesh = intersects[0].object;
-                            const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
-                            if (pObj) {
-                                changeWorld(pObj.targetIdx);
+                            
+                            if (clickedMesh === core) {
+                                toggleLanding();
+                            } else {
+                                const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
+                                if (pObj) {
+                                    changeWorld(pObj.targetIdx);
+                                }
                             }
                         }
                     }
@@ -2257,7 +2313,6 @@
             }
         }
         function onDocumentTouchMove(event) {
-            if (isModalOpen) return;
             if (event.touches.length === 1) {
                 mouseX = event.touches[0].pageX - windowHalfX;
                 mouseY = event.touches[0].pageY - windowHalfY;
