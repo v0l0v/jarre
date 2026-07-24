@@ -596,11 +596,20 @@
                 core.visible = false;
                 alternativePortals.forEach(p => p.mesh.visible = false);
                 document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
-                planetInfo.style.opacity = '0';
+                const w = worldPalettes[currentWorld];
+                
+                // Mostrar info del planeta fija en la parte superior izquierda
+                const c = getPlanetCoords(w);
+                infoTitle.innerText = w.name;
+                const desc = w.description || w.type;
+                infoDesc.innerHTML = `${desc}<br/><span style="color:#0ff; font-size:0.7rem;">Coordenadas: [X: ${c.x}] [Y: ${c.y}] [Z: ${c.z}]</span>`;
+                planetInfo.style.opacity = '1';
+                planetInfo.style.left = '40px';
+                planetInfo.style.top = '100px';
                 
                 // Generar terreno
                 if (surfacePlane) surfaceGroup.remove(surfacePlane);
-                const w = worldPalettes[currentWorld];
+                
                 const geo = new THREE.SphereGeometry(2000, 128, 128); 
                 // Darle algo de ruido al terreno esférico
                 const pos = geo.attributes.position;
@@ -2192,6 +2201,9 @@
             
             normMouseX = (event.clientX / window.innerWidth) * 2 - 1;
             normMouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Si estamos en modo dron, no actualizar la posición (se queda fijo)
+            if (isLanded) return;
             
             let tx = event.clientX;
             let ty = event.clientY + 20; // Justo debajo
