@@ -1603,7 +1603,7 @@
         // Anomalía (Easter Egg)
         let anomalyActive = false;
         let omegaDiscovered = false;
-        const anomalyGeo = new THREE.SphereGeometry(8, 16, 16); 
+        const anomalyGeo = new THREE.TorusGeometry(15, 2, 16, 64); // Una mirilla / anillo
         const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 });
         const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
         
@@ -1625,13 +1625,9 @@
             anomalyMesh.position.set(
                 (Math.random() - 0.5) * 500, // Spawn más centrado
                 (Math.random() - 0.5) * 400,
-                cameraBaseZ - (400 + Math.random() * 200)
+                cameraBaseZ - (600 + Math.random() * 200) // Un poco más lejos para que el Parallax no lo tape rápido
             );
-            anomalyMesh.userData.velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 0.5, // Muy poco movimiento lateral
-                (Math.random() - 0.5) * 0.5,
-                (Math.random() * 1) + 1.0 // Viene directo hacia ti
-            );
+            anomalyMesh.userData.velocity = new THREE.Vector3(0, 0, 0); // Estático
             anomalyMesh.userData.maxLifespan = 180 + Math.random() * 180; // 3 a 6 segundos a 60fps
             anomalyMesh.userData.lifespan = anomalyMesh.userData.maxLifespan;
         }
@@ -1901,9 +1897,12 @@
             core.rotation.y = time * 3;
 
             if (anomalyActive) {
-                anomalyMesh.position.add(anomalyMesh.userData.velocity);
-                anomalyMesh.rotation.x += 0.01;
-                anomalyMesh.rotation.y += 0.02;
+                // Latido suave
+                const pulse = 1.0 + Math.sin(time * 5.0) * 0.15;
+                anomalyMesh.scale.set(pulse, pulse, pulse);
+                
+                // Rotación sutil
+                anomalyMesh.rotation.z += 0.01;
                 
                 const maxLife = anomalyMesh.userData.maxLifespan;
                 const curLife = anomalyMesh.userData.lifespan;
