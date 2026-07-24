@@ -1368,9 +1368,19 @@
         }
 
         function createPlanetTexture(w) {
+            const normName = w.name.toLowerCase().replace(/ /g, '');
+            const pAssets = planetAssetsMap[normName];
+            if (pAssets && pAssets.files) {
+                const texFile = pAssets.files.find(f => f.toLowerCase().startsWith('textura.'));
+                if (texFile) {
+                    w.texture_url = `${pAssets.folder}/${texFile}`;
+                }
+            }
+
             if (w.texture_url) {
                 const loader = new THREE.TextureLoader();
                 const texture = loader.load(w.texture_url);
+                texture.colorSpace = THREE.SRGBColorSpace || THREE.LinearSRGBColorSpace;
                 return texture;
             }
 
