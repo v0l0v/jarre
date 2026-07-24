@@ -1638,9 +1638,19 @@
                 ctx.fillRect(0,0,512,512);
                 for(let i=0; i<300; i++) {
                     ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str;
-                    ctx.beginPath();
-                    ctx.arc(Math.random()*512, Math.random()*512, Math.random()*15, 0, Math.PI*2);
-                    ctx.fill();
+                    const r = Math.random()*15;
+                    const cx = Math.random()*512;
+                    const cy = Math.random()*512;
+                    
+                    const drawDot = (x, y) => {
+                        ctx.beginPath();
+                        ctx.arc(x, y, r, 0, Math.PI*2);
+                        ctx.fill();
+                    };
+                    
+                    drawDot(cx, cy);
+                    if (cx - r < 0) drawDot(cx + 512, cy);
+                    if (cx + r > 512) drawDot(cx - 512, cy);
                 }
             } else if (w.type === 'fire') {
                 const grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 300);
@@ -1686,9 +1696,19 @@
                 ctx.fillRect(0,0,512,512);
                 for(let i=0; i<50; i++) {
                     ctx.fillStyle = Math.random() > 0.5 ? c1Str : c3Str;
-                    ctx.beginPath();
-                    ctx.arc(Math.random()*512, Math.random()*512, 30+Math.random()*50, 0, Math.PI*2);
-                    ctx.fill();
+                    const r = 30 + Math.random()*50;
+                    const cx = Math.random()*512;
+                    const cy = Math.random()*512;
+                    
+                    const drawDot = (x, y) => {
+                        ctx.beginPath();
+                        ctx.arc(x, y, r, 0, Math.PI*2);
+                        ctx.fill();
+                    };
+                    
+                    drawDot(cx, cy);
+                    if (cx - r < 0) drawDot(cx + 512, cy);
+                    if (cx + r > 512) drawDot(cx - 512, cy);
                 }
             }
             return new THREE.CanvasTexture(canvas);
