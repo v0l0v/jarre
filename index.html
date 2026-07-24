@@ -1603,7 +1603,7 @@
         // Anomalía (Easter Egg)
         let anomalyActive = false;
         let omegaDiscovered = false;
-        const anomalyGeo = new THREE.CapsuleGeometry(15, 30, 16, 16); 
+        const anomalyGeo = new THREE.CylinderGeometry(15, 15, 40, 16); 
         const anomalyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0 });
         const anomalyMesh = new THREE.Mesh(anomalyGeo, anomalyMat);
         
