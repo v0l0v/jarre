@@ -538,11 +538,7 @@
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
         camera.position.z = 1200;
-        scene.add(camera);
 
-        let wormholeGroup = new THREE.Group();
-        camera.add(wormholeGroup);
-        let wormholeRings = [];
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -624,65 +620,6 @@
             sweepOsc.stop(t + dur);
         }
 
-        function triggerWormhole() {
-            while(wormholeGroup.children.length > 0){ 
-                wormholeGroup.remove(wormholeGroup.children[0]); 
-            }
-            wormholeRings = [];
-            const ringCount = 30;
-            const c1 = Math.random() * 0xffffff;
-            const c2 = Math.random() * 0xffffff;
-            
-            for (let i = 0; i < ringCount; i++) {
-                const radius = 50 + Math.random() * 100;
-                const tubeGeo = new THREE.TorusGeometry(radius, 1 + Math.random() * 3, 5, 24);
-                const mat = new THREE.MeshBasicMaterial({ 
-                    color: Math.random() > 0.5 ? c1 : c2, 
-                    transparent: true, opacity: 0.0, 
-                    wireframe: Math.random() > 0.3 
-                });
-                const mesh = new THREE.Mesh(tubeGeo, mat);
-                mesh.position.z = -100 - (Math.random() * 4000);
-                mesh.rotation.x = Math.random() * Math.PI;
-                mesh.rotation.y = Math.random() * Math.PI;
-                wormholeGroup.add(mesh);
-                wormholeRings.push(mesh);
-            }
-        }
-
-        function updateWormhole(delta) {
-            for (let i = 0; i < wormholeRings.length; i++) {
-                const mesh = wormholeRings[i];
-                mesh.position.z += 2500 * delta; // Volando hacia la cámara
-                mesh.rotation.x += 1 * delta;
-                mesh.rotation.y += 1 * delta;
-                
-                // Fade in/out basado en cercanía
-                if (mesh.position.z > 0) {
-                    mesh.material.opacity = 0;
-                } else if (mesh.position.z > -500) {
-                    mesh.material.opacity = Math.abs(mesh.position.z) / 500;
-                } else {
-                    mesh.material.opacity = 1;
-                }
-                
-                // Bucle infinito mientras dure el warp
-                if (mesh.position.z > 100) {
-                    mesh.position.z -= 4000;
-                    // Mutar color levemente para psicodelia
-                    mesh.material.color.offsetHSL(0.01, 0, 0);
-                }
-            }
-        }
-
-        function hideWormhole() {
-            while(wormholeGroup.children.length > 0){ 
-                wormholeGroup.remove(wormholeGroup.children[0]); 
-            }
-            wormholeRings = [];
-        }
-
-
         let activeNeighbors = [];
         let anchorPlanet = null; // Planeta central de la vista
 
@@ -732,7 +669,7 @@
 
             document.getElementById('ui').style.opacity = '0';
 
-            isWarpSpeed = true; triggerWormhole();
+            isWarpSpeed = true;
             warpTimer = 3.5; 
             alternativePortals.forEach(p => p.mesh.visible = false);
             document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
@@ -1735,7 +1672,7 @@
                     anomalyMesh.visible = false;
                     document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
                     planetInfo.style.opacity = '0';
-                    isWarpSpeed = true; triggerWormhole();
+                    isWarpSpeed = true;
                     warpTimer = 3.0; // Salto turbulento
                     warpTargetX = anomalyMesh.position.x;
                     warpTargetY = -anomalyMesh.position.y;
@@ -1751,7 +1688,7 @@
                     alternativePortals.forEach(p => { if (p !== pObj) p.mesh.visible = false; });
                     planetInfo.style.opacity = '0';
                     
-                    isWarpSpeed = true; triggerWormhole();
+                    isWarpSpeed = true;
                     warpTimer = 2.0; 
                     warpTargetX = pObj.mesh.position.x;
                     warpTargetY = -pObj.mesh.position.y; 
@@ -1767,7 +1704,7 @@
             initAudio();
             if (isWarpSpeed || isModalOpen) return;
             
-            isWarpSpeed = true; triggerWormhole();
+            isWarpSpeed = true;
             warpTimer = 4.0; // Warp súper largo
             warpTargetX = 0; warpTargetY = 0; warpTargetZ = 1200;
             playWarpSound(3.0);
@@ -1791,7 +1728,7 @@
             
             if (!skipWarp) {
                 // Disparar un salto hiperespacial de retorno para camuflar la transición
-                isWarpSpeed = true; triggerWormhole();
+                isWarpSpeed = true;
                 warpTimer = 2.0;
                 warpTargetX = 0;
                 warpTargetY = 0;
@@ -1863,7 +1800,6 @@
             
             // Lógica de Velocidad Láser y desplazamiento
             if (isWarpSpeed) {
-                updateWormhole(delta);
                 
                 warpTimer -= delta;
                 targetSpeed = 15.0; 
@@ -1876,7 +1812,6 @@
 
                 if (warpTimer <= 0) {
                     isWarpSpeed = false;
-                    hideWormhole();
                     
                     if (pendingWorldIndex !== -1) {
                         const target = pendingWorldIndex;
@@ -2175,7 +2110,7 @@
                 node.onclick = () => {
                     closeMap(true); // indicamos que estamos saltando
                     // Volar hacia adelante genéricamente desde el mapa
-                    isWarpSpeed = true; triggerWormhole();
+                    isWarpSpeed = true;
                     warpTimer = 2.0;
                     warpTargetX = (Math.random() - 0.5) * 1000;
                     warpTargetY = (Math.random() - 0.5) * 1000;
