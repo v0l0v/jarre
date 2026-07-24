@@ -87,36 +87,6 @@
         }
 
         
-        .fullscreen-btn {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            color: #fff;
-            text-decoration: none;
-            width: 60px;
-            height: 60px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            z-index: 20;
-            cursor: pointer;
-        }
-        .fullscreen-btn:hover {
-            background: #fff;
-            color: #000;
-            transform: scale(1.15);
-            box-shadow: 0 0 25px rgba(0, 238, 255, 0.6);
-            border-color: #00eeff;
-        }
-        .fullscreen-btn svg {
-            width: 32px;
-            height: 32px;
-        }
-        
         .hint {
             position: absolute;
             bottom: 2rem;
@@ -328,15 +298,47 @@
         #btn-warp { left: 20px; }
         #btn-map { left: 90px; }
         #btn-land { left: 160px; }
-        #btn-term { right: 20px; }
+        #btn-term { right: 90px; }
+        #btn-fullscreen { right: 20px; }
+        
+        .modal-top-btn {
+            position: absolute;
+            top: 20px;
+            z-index: 10;
+            background: rgba(10, 5, 21, 0.7);
+            border: 1px solid rgba(0, 238, 255, 0.4);
+            color: rgba(0, 238, 255, 0.8);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: monospace;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 10px rgba(0, 238, 255, 0.1);
+        }
+        .modal-top-btn:hover {
+            background: rgba(0, 238, 255, 0.2);
+            border-color: #00eeff;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 238, 255, 0.6);
+            transform: scale(1.1);
+        }
+        .minimize-modal-btn { right: 70px; line-height: 25px; align-items: flex-start; padding-top: 5px; }
+        .close-modal-btn { right: 20px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
     <div id="aura-modal">
         <div id="aura-modal-content">
-            <button class="minimize-modal-btn" onclick="toggleMinimizeAuraModal()" title="Minimizar / Explorar" style="position: absolute; top: 20px; right: 70px; z-index: 10; background: transparent; border: none; color: white; opacity: 0.7; cursor: pointer; width: 40px; height: 40px; transition: all 0.3s ease; font-family: monospace; font-size: 28px; font-weight: bold; line-height: 40px; display: flex; justify-content: center; align-items: center;">
+            <button class="modal-top-btn minimize-modal-btn" onclick="toggleMinimizeAuraModal()" title="Minimizar / Explorar">
                 _
             </button>
-            <button class="close-modal-btn" onclick="closeAuraModal()" title="Cerrar Visor" style="font-family: monospace; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center;">
+            <button class="modal-top-btn close-modal-btn" onclick="closeAuraModal()" title="Cerrar Visor">
                 X
             </button>
             <video id="aura-player" src="" controls loop playsinline></video>
@@ -518,11 +520,11 @@
         </svg>
     </button>
 
-    <a href="#" onclick="toggleFullScreen(document.documentElement); return false;" class="fullscreen-btn" title="Pantalla Completa">
+    <button id="btn-fullscreen" class="hud-btn" onclick="toggleFullScreen(document.documentElement)" title="Pantalla Completa">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
         </svg>
-    </a>
+    </button>
     
     <div id="ui">
         <h1 id="world-title"></h1>
@@ -621,6 +623,11 @@
                 const uiDiv = document.getElementById('ui');
                 uiDiv.style.display = 'none';
                 
+                const btnMap = document.getElementById('btn-map');
+                const btnWarp = document.getElementById('btn-warp');
+                if (btnMap) { btnMap.style.opacity = '0.3'; btnMap.style.pointerEvents = 'none'; }
+                if (btnWarp) { btnWarp.style.opacity = '0.3'; btnWarp.style.pointerEvents = 'none'; }
+                
                 planetInfo.style.opacity = '0'; // Ocultar el cajetín flotante
                 
                 // Generar terreno
@@ -687,6 +694,11 @@
                 uiDiv.style.display = 'block';
                 uiDiv.style.top = '50%';
                 uiDiv.style.transform = 'translate(-50%, -50%)';
+                
+                const btnMap = document.getElementById('btn-map');
+                const btnWarp = document.getElementById('btn-warp');
+                if (btnMap) { btnMap.style.opacity = '1'; btnMap.style.pointerEvents = 'auto'; }
+                if (btnWarp) { btnWarp.style.opacity = '1'; btnWarp.style.pointerEvents = 'auto'; }
                 
                 if (isModalMinimized) {
                     toggleMinimizeAuraModal();
@@ -1859,6 +1871,7 @@
 
         let absurdWarpInterval;
         function randomAbsurdWarp() {
+            if (isLanded) return;
             initAudio();
             if (isWarpSpeed || isModalOpen) return;
             
@@ -2422,6 +2435,7 @@
         }
 
         function openMap() {
+            if (isLanded) return;
             triggerTVNoise('tv-noise-in');
             const gameMap = document.getElementById('game-map');
             gameMap.style.display = 'flex';
