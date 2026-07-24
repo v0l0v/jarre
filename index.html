@@ -1728,6 +1728,9 @@
         }
 
         function changeWorld(idx, skipWarp = false) {
+            if (currentWorld === SECRET_INDEX && idx !== SECRET_INDEX) {
+                omegaDiscovered = false;
+            }
             currentWorld = idx;
             alternativePortals.forEach(p => p.mesh.visible = false);
             document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
