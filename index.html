@@ -343,6 +343,11 @@
         }
         #btn-map { left: 20px; }
         #btn-term { right: 20px; }
+        #btn-land { 
+            left: 50%; transform: translateX(-50%); width: auto; padding: 0 20px; border-radius: 25px; 
+            font-family: 'Outfit', sans-serif; font-weight: bold; letter-spacing: 2px;
+        }
+        #btn-land:hover { transform: translateX(-50%) scale(1.05); }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
     <div id="aura-modal">
@@ -514,11 +519,14 @@
         <h1 id="world-title"></h1>
         <p id="world-desc">LABORATORIO VISUAL</p>
         <div id="aura-links">
-            <!-- Botones dinámicos se inyectan aquí -->
+            <div id="links-container"></div>
         </div>
     </div>
     
-    <button id="btn-map" class="hud-btn" onclick="openMap()" title="Abrir Mapa Estelar">
+    <button id="btn-land" class="hud-btn" onclick="toggleLanding()" title="Módulo de Aterrizaje">
+        <span>ATERRIZAR</span>
+    </button>
+    <button id="btn-map" class="hud-btn" onclick="openMap()" title="Mapa Estelar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
             <line x1="9" y1="3" x2="9" y2="18"></line>
@@ -562,10 +570,108 @@
         let mouseY = 0;
         let normMouseX = 0;
         let normMouseY = 0;
-        let targetX = 0;
-        let targetY = 0;
+        let targetX = 0, targetY = 0;
+        let cameraBaseX = 0, cameraBaseY = 0, cameraBaseZ = 1200;
         const windowHalfX = window.innerWidth / 2;
         const windowHalfY = window.innerHeight / 2;
+        
+        // Controles de aterrizaje
+        let isLanded = false;
+        const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
+        let playerVel = { x: 0, z: 0 };
+        const surfaceGroup = new THREE.Group();
+        surfaceGroup.visible = false;
+        scene.add(surfaceGroup);
+        
+        let surfacePlane = null;
+
+        function toggleLanding() {
+            isLanded = !isLanded;
+            const btn = document.getElementById('btn-land').querySelector('span');
+            
+            if (isLanded) {
+                btn.innerText = "ÓRBITA";
+                // Ocultar elementos espaciales
+                core.visible = false;
+                particleSystem.visible = false;
+                alternativePortals.forEach(p => p.mesh.visible = false);
+                document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
+                planetInfo.style.opacity = '0';
+                
+                // Generar terreno
+                if (surfacePlane) surfaceGroup.remove(surfacePlane);
+                const w = worldPalettes[currentWorld];
+                
+                const geo = new THREE.PlaneGeometry(8000, 8000, 64, 64);
+                // Darle algo de ruido al terreno
+                const pos = geo.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    // Ruido simple
+                    const z = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 100 + Math.sin(x * 0.02 + y * 0.01) * 20;
+                    pos.setZ(i, z);
+                }
+                geo.computeVertexNormals();
+                
+                const mat = new THREE.MeshBasicMaterial({ 
+                    color: w.c2, 
+                    wireframe: true, 
+                    transparent: true, 
+                    opacity: 0.6 
+                });
+                
+                surfacePlane = new THREE.Mesh(geo, mat);
+                surfacePlane.rotation.x = -Math.PI / 2;
+                surfacePlane.position.y = -50;
+                surfaceGroup.add(surfacePlane);
+                
+                // Añadir suelo base oscuro
+                const baseGeo = new THREE.PlaneGeometry(8000, 8000);
+                const baseMat = new THREE.MeshBasicMaterial({ color: getDarkenedHex(w.bg, 0.5) });
+                const basePlane = new THREE.Mesh(baseGeo, baseMat);
+                basePlane.rotation.x = -Math.PI / 2;
+                basePlane.position.y = -55;
+                surfaceGroup.add(basePlane);
+                
+                surfaceGroup.visible = true;
+                
+                // Configurar cámara para superficie
+                camera.position.set(0, 50, 0);
+                camera.lookAt(0, 50, -100);
+                camera.fov = 75;
+                camera.updateProjectionMatrix();
+                
+            } else {
+                btn.innerText = "ATERRIZAR";
+                surfaceGroup.visible = false;
+                
+                core.visible = true;
+                particleSystem.visible = true;
+                planetInfo.style.opacity = '1';
+                
+                camera.fov = 60;
+                camera.updateProjectionMatrix();
+            }
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (!isLanded) return;
+            const k = e.key.toLowerCase();
+            if (k === 'w' || k === 'arrowup') keys.w = true;
+            if (k === 'a' || k === 'arrowleft') keys.a = true;
+            if (k === 's' || k === 'arrowdown') keys.s = true;
+            if (k === 'd' || k === 'arrowright') keys.d = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (!isLanded) return;
+            const k = e.key.toLowerCase();
+            if (k === 'w' || k === 'arrowup') keys.w = false;
+            if (k === 'a' || k === 'arrowleft') keys.a = false;
+            if (k === 's' || k === 'arrowdown') keys.s = false;
+            if (k === 'd' || k === 'arrowright') keys.d = false;
+        });
         
         const planetInfo = document.getElementById('planet-info');
         const infoTitle = document.getElementById('info-title');
@@ -576,9 +682,6 @@
         let warpTimer = 0;
         let currentSpeed = 1;
         let targetSpeed = 1;
-        let cameraBaseX = 0;
-        let cameraBaseY = 0;
-        let cameraBaseZ = 1200;
         let fovTarget = 75;
         
         let warpTargetX = 0;
@@ -1080,7 +1183,7 @@
                 return;
             }
 
-            if (isWarpSpeed) return;
+            if (isWarpSpeed || isLanded) return;
             if (document.getElementById('game-map').style.display === 'flex') return;
             
             if (event.key === 'ArrowUp') triggerDirectionalJump('up');
@@ -1841,6 +1944,42 @@
             const delta = clock.getDelta();
             const timeRaw = clock.getElapsedTime();
             
+            if (isLanded) {
+                // Lógica de movimiento FPS básico
+                const speed = 400 * delta;
+                if (keys.w) playerVel.z -= speed;
+                if (keys.s) playerVel.z += speed;
+                if (keys.a) playerVel.x -= speed;
+                if (keys.d) playerVel.x += speed;
+                
+                // Fricción
+                playerVel.x *= 0.9;
+                playerVel.z *= 0.9;
+                
+                camera.position.x += playerVel.x * delta;
+                camera.position.z += playerVel.z * delta;
+                
+                // Mantener la cámara ligeramente oscilante al moverse
+                const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
+                if (moveSpeed > 5) {
+                    camera.position.y = 50 + Math.sin(timeRaw * 10) * 2;
+                } else {
+                    camera.position.y = 50;
+                }
+                
+                // Mirar hacia adelante (con leve giro basado en mouse)
+                targetX = mouseX * 0.5;
+                targetY = mouseY * 0.5;
+                camera.lookAt(
+                    camera.position.x + targetX, 
+                    camera.position.y - targetY, 
+                    camera.position.z - 200
+                );
+                
+                renderer.render(scene, camera);
+                return; // Saltarse la lógica orbital
+            }
+
             if (!isWarpSpeed && warpActiveMeshes.length > 0) clearWarpEngine();
             
             // Lógica de Velocidad Láser y desplazamiento
