@@ -1624,8 +1624,8 @@
             }
 
             const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
+            canvas.width = 1024;
+            canvas.height = 1024;
             const ctx = canvas.getContext('2d');
             
             const bgStr = getHexColor(w.bg);
@@ -1635,12 +1635,12 @@
             
             if (w.type === 'neon') {
                 ctx.fillStyle = bgStr;
-                ctx.fillRect(0,0,512,512);
+                ctx.fillRect(0,0,1024,1024);
                 for(let i=0; i<300; i++) {
                     ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str;
-                    const r = Math.random()*15;
-                    const cx = Math.random()*512;
-                    const cy = Math.random()*512;
+                    const r = Math.random()*30;
+                    const cx = Math.random()*1024;
+                    const cy = Math.random()*1024;
                     
                     const drawDot = (x, y) => {
                         ctx.beginPath();
@@ -1649,56 +1649,56 @@
                     };
                     
                     drawDot(cx, cy);
-                    if (cx - r < 0) drawDot(cx + 512, cy);
-                    if (cx + r > 512) drawDot(cx - 512, cy);
+                    if (cx - r < 0) drawDot(cx + 1024, cy);
+                    if (cx + r > 1024) drawDot(cx - 1024, cy);
                 }
             } else if (w.type === 'fire') {
-                const grad = ctx.createLinearGradient(0, 0, 0, 512);
+                const grad = ctx.createLinearGradient(0, 0, 0, 1024);
                 grad.addColorStop(0, c2Str);
                 grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad;
-                ctx.fillRect(0,0,512,512);
+                ctx.fillRect(0,0,1024,1024);
                 for(let i=0; i<150; i++) {
                     ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                    ctx.fillRect(Math.random()*512, Math.random()*512, 100, 5);
+                    ctx.fillRect(Math.random()*1024, Math.random()*1024, 200, 10);
                 }
             } else if (w.type === 'toxic') {
                 ctx.fillStyle = bgStr;
-                ctx.fillRect(0,0,512,512);
-                for(let x=0; x<512; x+=32) {
-                    for(let y=0; y<512; y+=32) {
+                ctx.fillRect(0,0,1024,1024);
+                for(let x=0; x<1024; x+=64) {
+                    for(let y=0; y<1024; y+=64) {
                         ctx.fillStyle = Math.random() > 0.5 ? c1Str : c2Str;
-                        ctx.fillRect(x,y,32,32);
+                        ctx.fillRect(x,y,64,64);
                     }
                 }
             } else if (w.type === 'ice') {
-                const grad = ctx.createLinearGradient(0, 0, 0, 512);
+                const grad = ctx.createLinearGradient(0, 0, 0, 1024);
                 grad.addColorStop(0, c1Str);
                 grad.addColorStop(1, bgStr);
                 ctx.fillStyle = grad;
-                ctx.fillRect(0,0,512,512);
+                ctx.fillRect(0,0,1024,1024);
                 for(let i=0; i<200; i++) {
                     ctx.fillStyle = 'rgba(255,255,255,0.8)';
                     ctx.beginPath();
-                    ctx.moveTo(Math.random()*512, Math.random()*512);
-                    ctx.lineTo(Math.random()*512, Math.random()*512);
-                    ctx.lineTo(Math.random()*512, Math.random()*512);
+                    ctx.moveTo(Math.random()*1024, Math.random()*1024);
+                    ctx.lineTo(Math.random()*1024, Math.random()*1024);
+                    ctx.lineTo(Math.random()*1024, Math.random()*1024);
                     ctx.fill();
                 }
             } else if (w.type === 'aura') {
-                for(let i=0; i<512; i+=4) {
+                for(let i=0; i<1024; i+=8) {
                     const r = Math.random();
                     ctx.fillStyle = r > 0.66 ? c1Str : (r > 0.33 ? c2Str : c3Str);
-                    ctx.fillRect(0, i, 512, 4);
+                    ctx.fillRect(0, i, 1024, 8);
                 }
             } else if (w.type === 'terra') {
                 ctx.fillStyle = bgStr;
-                ctx.fillRect(0,0,512,512);
+                ctx.fillRect(0,0,1024,1024);
                 for(let i=0; i<50; i++) {
                     ctx.fillStyle = Math.random() > 0.5 ? c1Str : c3Str;
-                    const r = 30 + Math.random()*50;
-                    const cx = Math.random()*512;
-                    const cy = Math.random()*512;
+                    const r = 60 + Math.random()*100;
+                    const cx = Math.random()*1024;
+                    const cy = Math.random()*1024;
                     
                     const drawDot = (x, y) => {
                         ctx.beginPath();
@@ -1707,8 +1707,8 @@
                     };
                     
                     drawDot(cx, cy);
-                    if (cx - r < 0) drawDot(cx + 512, cy);
-                    if (cx + r > 512) drawDot(cx - 512, cy);
+                    if (cx - r < 0) drawDot(cx + 1024, cy);
+                    if (cx + r > 1024) drawDot(cx - 1024, cy);
                 }
             }
             return new THREE.CanvasTexture(canvas);
