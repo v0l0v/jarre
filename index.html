@@ -1662,7 +1662,6 @@
             initAudio();
             
             const visibleMeshes = alternativePortals.filter(p => p.mesh.visible).map(p => p.mesh);
-            if (anomalyActive && anomalyMesh.visible) visibleMeshes.push(anomalyMesh);
             
             if (visibleMeshes.length === 0) return;
             
@@ -1674,21 +1673,6 @@
             
             if (intersects.length > 0) {
                 const clickedMesh = intersects[0].object;
-                
-                if (clickedMesh === anomalyMesh) {
-                    anomalyActive = false;
-                    anomalyMesh.visible = false;
-                    document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
-                    planetInfo.style.opacity = '0';
-                    isWarpSpeed = true;
-                    warpTimer = 3.0; // Salto turbulento
-                    warpTargetX = anomalyMesh.position.x;
-                    warpTargetY = -anomalyMesh.position.y;
-                    warpTargetZ = anomalyMesh.position.z + 100;
-                    pendingWorldIndex = SECRET_INDEX;
-                    playWarpSound(3.0);
-                    return;
-                }
                 
                 const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
                 if (pObj) {
