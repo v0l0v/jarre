@@ -343,11 +343,7 @@
         }
         #btn-map { left: 20px; }
         #btn-term { right: 20px; }
-        #btn-land { 
-            left: 50%; transform: translateX(-50%); width: auto; padding: 0 20px; border-radius: 25px; 
-            font-family: 'Outfit', sans-serif; font-weight: bold; letter-spacing: 2px;
-        }
-        #btn-land:hover { transform: translateX(-50%) scale(1.05); }
+        #btn-land { left: 90px; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
     <div id="aura-modal">
@@ -523,8 +519,11 @@
         </div>
     </div>
     
-    <button id="btn-land" class="hud-btn" onclick="toggleLanding()" title="Módulo de Aterrizaje">
-        <span>ATERRIZAR</span>
+    <button id="btn-land" class="hud-btn" onclick="toggleLanding()" title="Inspeccionar Superficie">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+        </svg>
     </button>
     <button id="btn-map" class="hud-btn" onclick="openMap()" title="Mapa Estelar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -588,10 +587,10 @@
 
         function toggleLanding() {
             isLanded = !isLanded;
-            const btn = document.getElementById('btn-land').querySelector('span');
+            const btn = document.getElementById('btn-land');
             
             if (isLanded) {
-                btn.innerText = "ÓRBITA";
+                btn.title = "Volver a Órbita";
                 // Ocultar elementos espaciales
                 core.visible = false;
                 particleSystem.visible = false;
@@ -645,7 +644,7 @@
                 camera.updateProjectionMatrix();
                 
             } else {
-                btn.innerText = "ATERRIZAR";
+                btn.title = "Inspeccionar Superficie";
                 surfaceGroup.visible = false;
                 
                 core.visible = true;
