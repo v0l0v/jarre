@@ -1878,11 +1878,6 @@
             if (intersects.length > 0) {
                 const clickedMesh = intersects[0].object;
                 
-                if (clickedMesh === core) {
-                    toggleLanding();
-                    return;
-                }
-                
                 const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
                 if (pObj) {
                     document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
@@ -2342,13 +2337,9 @@
                         if (intersects.length > 0) {
                             const clickedMesh = intersects[0].object;
                             
-                            if (clickedMesh === core) {
-                                toggleLanding();
-                            } else {
-                                const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
-                                if (pObj) {
-                                    changeWorld(pObj.targetIdx);
-                                }
+                            const pObj = alternativePortals.find(p => p.mesh === clickedMesh);
+                            if (pObj) {
+                                changeWorld(pObj.targetIdx);
                             }
                         }
                     }
