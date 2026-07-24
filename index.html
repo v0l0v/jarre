@@ -577,7 +577,7 @@
         // Controles de aterrizaje
         let isLanded = false;
         let droneThrust = 0;
-        let droneAltitude = 1000;
+        let droneAltitude = 3000;
         const keys = { w: false, a: false, s: false, d: false, up: false, down: false, left: false, right: false };
         let playerVel = { x: 0, z: 0 };
         const surfaceGroup = new THREE.Group();
@@ -611,8 +611,8 @@
                     const y = v.y;
                     const z = v.z;
                     
-                    // Ruido 3D para montañas
-                    const noise = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 150 + Math.sin(z * 0.01 + y * 0.008) * 50;
+                    // Ruido 3D para montañas (reducido para no deformar en exceso la esfera)
+                    const noise = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 80 + Math.sin(z * 0.01 + y * 0.008) * 30;
                     
                     v.normalize().multiplyScalar(2000 + noise);
                     pos.setXYZ(i, v.x, v.y, v.z);
@@ -640,8 +640,8 @@
                 surfaceGroup.visible = true;
                 
                 // Configurar cámara para superficie (inmóvil en X/Z)
-                camera.position.set(0, 1000, 0);
-                camera.lookAt(0, 400, -400);
+                camera.position.set(0, droneAltitude, 0);
+                camera.lookAt(0, -2000, 0);
                 camera.fov = 75;
                 camera.updateProjectionMatrix();
                 
@@ -1981,8 +1981,8 @@
                 }
                 
                 // Control de altitud (Zoom In / Zoom Out)
-                if (keys.up) droneAltitude = Math.max(droneAltitude - delta * 1200, 150); // Acercarse (bajar altura)
-                if (keys.down) droneAltitude = Math.min(droneAltitude + delta * 1200, 3000); // Alejarse (subir altura)
+                if (keys.up) droneAltitude = Math.max(droneAltitude - delta * 2000, 150); // Acercarse (bajar altura)
+                if (keys.down) droneAltitude = Math.min(droneAltitude + delta * 2000, 8000); // Alejarse (subir altura)
                 
                 // Mantener la cámara elevada (vista dron más alta, oscilación)
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
@@ -1992,13 +1992,13 @@
                     camera.position.y = droneAltitude + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
-                // Mirar hacia abajo con un ángulo inclinado hacia adelante
+                // Mirar hacia abajo y adelante dinámicamente según la altura
                 targetX = mouseX * 0.5;
                 targetY = mouseY * 0.5;
                 camera.lookAt(
                     targetX, 
-                    camera.position.y - (droneAltitude * 0.8) - targetY, 
-                    - (droneAltitude * 0.6)
+                    camera.position.y - Math.max(1000, droneAltitude) - targetY, 
+                    -Math.max(500, droneAltitude * 0.4)
                 );
                 
                 renderer.render(scene, camera);
