@@ -596,18 +596,11 @@
                 core.visible = false;
                 alternativePortals.forEach(p => p.mesh.visible = false);
                 document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
-                const w = worldPalettes[currentWorld];
+                const uiDiv = document.getElementById('ui');
+                uiDiv.style.top = '10%';
+                uiDiv.style.transform = 'translate(-50%, 0)';
                 
-                // Mostrar info del planeta fija en la parte superior izquierda
-                const c = getPlanetCoords(w);
-                infoTitle.innerText = w.name;
-                const desc = w.description || w.type;
-                infoDesc.innerHTML = `${desc}<br/><span style="color:#0ff; font-size:0.7rem;">Coordenadas: [X: ${c.x}] [Y: ${c.y}] [Z: ${c.z}]</span>`;
-                planetInfo.style.opacity = '1';
-                // Centrado en la parte superior
-                const panelWidth = planetInfo.offsetWidth || 250;
-                planetInfo.style.left = (window.innerWidth / 2 - panelWidth / 2) + 'px';
-                planetInfo.style.top = '40px';
+                planetInfo.style.opacity = '0'; // Ocultar el cajetín flotante
                 
                 // Generar terreno
                 if (surfacePlane) surfaceGroup.remove(surfacePlane);
@@ -668,6 +661,10 @@
                 
                 camera.fov = 60;
                 camera.updateProjectionMatrix();
+                
+                const uiDiv = document.getElementById('ui');
+                uiDiv.style.top = '50%';
+                uiDiv.style.transform = 'translate(-50%, -50%)';
                 
                 // Restaurar niebla del espacio
                 scene.fog.density = 0.0008;
@@ -2204,8 +2201,11 @@
             normMouseX = (event.clientX / window.innerWidth) * 2 - 1;
             normMouseY = -(event.clientY / window.innerHeight) * 2 + 1;
             
-            // Si estamos en modo dron, no actualizar la posición (se queda fijo)
-            if (isLanded) return;
+            // Si estamos en modo dron, asegurar que esté oculto
+            if (isLanded) {
+                planetInfo.style.opacity = '0';
+                return;
+            }
             
             let tx = event.clientX;
             let ty = event.clientY + 20; // Justo debajo
