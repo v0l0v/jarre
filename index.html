@@ -640,7 +640,7 @@
                 surfaceGroup.visible = true;
                 
                 // Configurar cámara para superficie (inmóvil en X/Z)
-                camera.position.set(0, droneAltitude, 0);
+                camera.position.set(0, 1800, 0);
                 camera.lookAt(0, -2000, 0);
                 camera.fov = 75;
                 camera.updateProjectionMatrix();
@@ -1976,9 +1976,9 @@
                     surfacePlane.rotateOnWorldAxis(zAxis, playerVel.x * delta * 0.0015);
                 }
                 
-                // La cámara se mantiene a una distancia constante para que el planeta ocupe ~60% de la pantalla
-                // Centro del planeta en Y = -2000. Altitud de cámara = 3200. Distancia total = 5200.
-                const fixedAltitude = 3200;
+                // La cámara se mantiene a una distancia constante para que el planeta ocupe ~60% de la pantalla (ancho panorámico)
+                // Centro del planeta en Y = -2000. Altitud de cámara = 1800. Distancia total = 3800.
+                const fixedAltitude = 1800;
                 
                 // Mantener la cámara elevada con leve oscilación
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
