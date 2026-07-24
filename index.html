@@ -591,9 +591,8 @@
             
             if (isLanded) {
                 btn.title = "Volver a Órbita";
-                // Ocultar elementos espaciales
+                // Ocultar elementos espaciales (pero no las estrellas)
                 core.visible = false;
-                particleSystem.visible = false;
                 alternativePortals.forEach(p => p.mesh.visible = false);
                 document.querySelectorAll('.planet-term').forEach(el => el.style.display = 'none');
                 planetInfo.style.opacity = '0';
@@ -648,7 +647,6 @@
                 surfaceGroup.visible = false;
                 
                 core.visible = true;
-                particleSystem.visible = true;
                 planetInfo.style.opacity = '1';
                 
                 camera.fov = 60;
