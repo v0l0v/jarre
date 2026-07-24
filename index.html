@@ -600,21 +600,21 @@
                 // Generar terreno
                 if (surfacePlane) surfaceGroup.remove(surfacePlane);
                 const w = worldPalettes[currentWorld];
-                
-                const geo = new THREE.PlaneGeometry(8000, 8000, 128, 128); // Más resolución
-                // Darle algo de ruido al terreno y curvatura planetaria
+                const geo = new THREE.SphereGeometry(2000, 128, 128); 
+                // Darle algo de ruido al terreno esférico
                 const pos = geo.attributes.position;
+                const v = new THREE.Vector3();
                 for (let i = 0; i < pos.count; i++) {
-                    const x = pos.getX(i);
-                    const y = pos.getY(i);
-                    // Curvatura del planeta (caída hacia los bordes)
-                    const distSq = x * x + y * y;
-                    const curvature = -distSq * 0.00004; 
+                    v.fromBufferAttribute(pos, i);
+                    const x = v.x;
+                    const y = v.y;
+                    const z = v.z;
                     
-                    // Ruido más exagerado para montañas grandes
-                    const noise = Math.sin(x * 0.002) * Math.cos(y * 0.002) * 300 + Math.sin(x * 0.01 + y * 0.008) * 80;
+                    // Ruido 3D para montañas
+                    const noise = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 150 + Math.sin(z * 0.01 + y * 0.008) * 50;
                     
-                    pos.setZ(i, curvature + noise);
+                    v.normalize().multiplyScalar(2000 + noise);
+                    pos.setXYZ(i, v.x, v.y, v.z);
                 }
                 geo.computeVertexNormals();
                 
@@ -635,14 +635,13 @@
                 });
                 
                 surfacePlane = new THREE.Mesh(geo, mat);
-                surfacePlane.rotation.x = -Math.PI / 2;
-                surfacePlane.position.y = -80; // Bajamos el centro un poco por si hay picos muy altos
+                surfacePlane.position.y = -2000; // Esfera de radio 2000, la cima queda en y=0
                 surfaceGroup.add(surfacePlane);
                 
                 surfaceGroup.visible = true;
                 
-                // Configurar cámara para superficie
-                camera.position.set(0, 500, 0);
+                // Configurar cámara para superficie (inmóvil en X/Z)
+                camera.position.set(0, 300, 0);
                 camera.lookAt(0, 100, -200);
                 camera.fov = 75;
                 camera.updateProjectionMatrix();
@@ -1967,31 +1966,32 @@
                 playerVel.x *= 0.94;
                 playerVel.z *= 0.94;
                 
-                camera.position.x += playerVel.x * delta;
-                camera.position.z += playerVel.z * delta;
+                // Rotar el planeta (simula movimiento del dron)
+                if (surfacePlane) {
+                    const xAxis = new THREE.Vector3(1, 0, 0);
+                    const zAxis = new THREE.Vector3(0, 0, 1);
+                    
+                    // Rotar sobre X mundial (adelante/atrás)
+                    surfacePlane.rotateOnWorldAxis(xAxis, playerVel.z * delta * 0.0015);
+                    // Rotar sobre Z mundial (izquierda/derecha)
+                    surfacePlane.rotateOnWorldAxis(zAxis, playerVel.x * delta * 0.0015);
+                }
                 
-                // Límites del mundo (rebote simpático)
-                const limit = 3800;
-                if (camera.position.x > limit) { camera.position.x = limit; playerVel.x *= -1.5; }
-                if (camera.position.x < -limit) { camera.position.x = -limit; playerVel.x *= -1.5; }
-                if (camera.position.z > limit) { camera.position.z = limit; playerVel.z *= -1.5; }
-                if (camera.position.z < -limit) { camera.position.z = -limit; playerVel.z *= -1.5; }
-                
-                // Mantener la cámara elevada (vista dron)
+                // Mantener la cámara elevada (vista dron, oscilación)
                 const moveSpeed = Math.sqrt(playerVel.x**2 + playerVel.z**2);
                 if (moveSpeed > 5) {
-                    camera.position.y = 500 + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
+                    camera.position.y = 300 + Math.sin(timeRaw * 5) * 5; // Leve balanceo del dron
                 } else {
-                    camera.position.y = 500 + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
+                    camera.position.y = 300 + Math.sin(timeRaw * 2) * 2; // Vuelo estacionario
                 }
                 
                 // Mirar hacia abajo con un ángulo inclinado hacia adelante (drone view)
                 targetX = mouseX * 0.5;
                 targetY = mouseY * 0.5;
                 camera.lookAt(
-                    camera.position.x + targetX, 
-                    camera.position.y - 400 - targetY, 
-                    camera.position.z - 200
+                    targetX, 
+                    camera.position.y - 200 - targetY, 
+                    -300
                 );
                 
                 renderer.render(scene, camera);
