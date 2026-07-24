@@ -602,14 +602,14 @@
                 if (surfacePlane) surfaceGroup.remove(surfacePlane);
                 const w = worldPalettes[currentWorld];
                 
-                const geo = new THREE.PlaneGeometry(8000, 8000, 64, 64);
+                const geo = new THREE.PlaneGeometry(8000, 8000, 128, 128); // Más resolución
                 // Darle algo de ruido al terreno
                 const pos = geo.attributes.position;
                 for (let i = 0; i < pos.count; i++) {
                     const x = pos.getX(i);
                     const y = pos.getY(i);
-                    // Ruido simple
-                    const z = Math.sin(x * 0.005) * Math.cos(y * 0.005) * 100 + Math.sin(x * 0.02 + y * 0.01) * 20;
+                    // Ruido más exagerado para montañas grandes
+                    const z = Math.sin(x * 0.002) * Math.cos(y * 0.002) * 300 + Math.sin(x * 0.01 + y * 0.008) * 80;
                     pos.setZ(i, z);
                 }
                 geo.computeVertexNormals();
@@ -619,28 +619,21 @@
                     groundTex = coreMat.map.clone();
                     groundTex.wrapS = THREE.RepeatWrapping;
                     groundTex.wrapT = THREE.RepeatWrapping;
-                    groundTex.repeat.set(8, 8);
+                    groundTex.repeat.set(12, 12); // Más repetición para que se vea más nítido de cerca
                     groundTex.needsUpdate = true;
                 }
                 
                 const mat = new THREE.MeshBasicMaterial({ 
                     map: groundTex,
                     color: groundTex ? 0xffffff : w.c2,
-                    wireframe: !groundTex
+                    wireframe: !groundTex,
+                    side: THREE.DoubleSide
                 });
                 
                 surfacePlane = new THREE.Mesh(geo, mat);
                 surfacePlane.rotation.x = -Math.PI / 2;
-                surfacePlane.position.y = -50;
+                surfacePlane.position.y = -80; // Bajamos el centro un poco por si hay picos muy altos
                 surfaceGroup.add(surfacePlane);
-                
-                // Añadir suelo base oscuro
-                const baseGeo = new THREE.PlaneGeometry(8000, 8000);
-                const baseMat = new THREE.MeshBasicMaterial({ color: getDarkenedHex(w.bg, 0.5) });
-                const basePlane = new THREE.Mesh(baseGeo, baseMat);
-                basePlane.rotation.x = -Math.PI / 2;
-                basePlane.position.y = -55;
-                surfaceGroup.add(basePlane);
                 
                 surfaceGroup.visible = true;
                 
